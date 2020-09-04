@@ -53,5 +53,8 @@
     <bean id="resultManager" class="org.n52.javaps.engine.impl.FileBasedResultPersistence"/>
 
     <bean id="testAlgo2" class="org.n52.javaps.algorithm.TestAlgorithm2"></bean>
+    <bean id="testAlgoCustomId" class="org.n52.javaps.algorithm.TestAlgorithmCustomId"></bean>
+    <bean id="annotatedTestAlgo" class="org.n52.javaps.algorithm.AnnotatedTestAlgorithmIdSameAsClassName"></bean>
+    <bean id="annotatedTestAlgoCustomId" class="org.n52.javaps.algorithm.AnnotatedTestAlgorithmCustomId"></bean>
 
 </beans>

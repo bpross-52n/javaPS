@@ -31,11 +31,11 @@ import org.n52.shetland.ogc.wps.description.ProcessOutputDescription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TestAlgorithm2 extends AbstractAlgorithm {
+public class TestAlgorithmCustomId extends AbstractAlgorithm {
 
-    private static final Logger log = LoggerFactory.getLogger(TestAlgorithm2.class);
+    private static final Logger log = LoggerFactory.getLogger(TestAlgorithmCustomId.class);
 
-//    public static final OwsCode ID = new OwsCode("org.n52.javaps.algorithm.TestAlgorithm2");
+    public static final OwsCode ID = new OwsCode("my-custom-process-id");
     public static final OwsCode LITERALINPUT_ID = new OwsCode("literalInput");
     public static final OwsCode LITERALOUTPUT_ID = new OwsCode("literalOutput");
     private TypedProcessDescriptionFactory descriptionFactory = new TypedProcessDescriptionFactory();
@@ -69,7 +69,7 @@ public class TestAlgorithm2 extends AbstractAlgorithm {
         
         outputs.add(literalOutput);
         
-        return new TypedProcessDescriptionFactory().process().withIdentifier(getClass().getCanonicalName()).withVersion("1.0.0").withInput(inputs).withOutput(outputs).build();
+        return new TypedProcessDescriptionFactory().process().withIdentifier(ID).withVersion("1.0.0").withInput(inputs).withOutput(outputs).build();
     }
 
 }
