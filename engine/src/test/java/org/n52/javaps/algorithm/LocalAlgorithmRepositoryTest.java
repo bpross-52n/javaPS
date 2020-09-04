@@ -55,18 +55,18 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 //@RunWith(SpringJUnit4ClassRunner.class)
 //@ContextConfiguration(classes = {InputProviderList.class, OutputProviderList.class, LocalAlgorithmRepository.class, ProviderAwareListableBeanFactory.class, InputHandlerRepositoryImpl.class, OutputHandlerRepositoryImpl.class, LiteralTypeRepositoryImpl.class, SpringContext.class, TestAlgorithm2.class, ContextAlgorithmRegistrator.class})
 public class LocalAlgorithmRepositoryTest extends AbstractTestCase {
-        
+
     public static final String epsg4328String = "EPSG:4328";
- 
+
 //    @Inject
 //    private AutowireCapableBeanFactory beanFactory;
-    
+
     @Inject
     private LocalAlgorithmRepository lar;
-    
+
     @Inject
     private Engine engine;
-    
+
 //    @Inject
 //    private BoundingBoxInputOutputHandler handler1;
 
@@ -75,16 +75,16 @@ public class LocalAlgorithmRepositoryTest extends AbstractTestCase {
 //       new ProviderAwareListableBeanFactory();
 //    }
 
-    
+
 //    @Before
 //    public void prepare() {
 //        MockitoAnnotations.initMocks(this);
 //    }
-    
+
     @Test
     public void testLAR() {
         System.out.println(this.lar.getAlgorithmNames());
-        
+
         List<ProcessData> inputs = null;
         List<OutputDefinition> outputs = null;
         try {
