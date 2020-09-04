@@ -498,6 +498,19 @@
 		        <version>3.1.12</version>
 		        <scope>provided</scope>
 	        </dependency>
+		    <dependency>
+			    <groupId>org.n52.geoprocessing</groupId>
+			    <artifactId>javaps-unit-test-environment</artifactId>
+			    <version>1</version>
+			    <classifier>tests</classifier>
+			    <scope>test</scope>
+		    </dependency>
+		    <dependency>
+			    <groupId>org.springframework</groupId>
+			    <artifactId>spring-test</artifactId>
+			    <version>${version.spring}</version>
+			    <scope>test</scope>
+		    </dependency>
       
         </dependencies>
     </dependencyManagement>
