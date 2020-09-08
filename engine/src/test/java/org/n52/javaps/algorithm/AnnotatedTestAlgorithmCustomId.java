@@ -32,7 +32,7 @@ public class AnnotatedTestAlgorithmCustomId {
     private static final Logger log = LoggerFactory.getLogger(AnnotatedTestAlgorithmCustomId.class);
 
     public static final String ID = "my-custom-annotated-process-id";
-    
+
     private List<String> literalInput;
 
     private String literalOutput;

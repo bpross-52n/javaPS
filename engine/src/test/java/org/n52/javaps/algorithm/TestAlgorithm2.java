@@ -58,17 +58,17 @@ public class TestAlgorithm2 extends AbstractAlgorithm {
     @Override
     protected TypedProcessDescription createDescription() {
         List<ProcessInputDescription> inputs = new ArrayList<>();
-        
+
         ProcessInputDescription literalInput = descriptionFactory.literalInput().withIdentifier(LITERALINPUT_ID).withType(new LiteralDoubleType()).withDefaultLiteralDataDomain(descriptionFactory.literalDataDomain().withValueDescription(OwsAnyValue.instance())).build();
-        
+
         inputs.add(literalInput);
-        
+
         List<ProcessOutputDescription> outputs = new ArrayList<>();
-        
+
         ProcessOutputDescription literalOutput = descriptionFactory.literalOutput().withIdentifier(LITERALOUTPUT_ID).withType(new LiteralDoubleType()).withDefaultLiteralDataDomain(descriptionFactory.literalDataDomain().withValueDescription(OwsAnyValue.instance())).build();
-        
+
         outputs.add(literalOutput);
-        
+
         return new TypedProcessDescriptionFactory().process().withIdentifier(getClass().getCanonicalName()).withVersion("1.0.0").withInput(inputs).withOutput(outputs).build();
     }
 

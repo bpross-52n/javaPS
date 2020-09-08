@@ -59,6 +59,12 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
+            <artifactId>engine</artifactId>
+            <scope>test</scope>
+            <classifier>tests</classifier>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
             <artifactId>kvp</artifactId>
             <scope>runtime</scope>
         </dependency>
@@ -248,13 +254,6 @@
                     <include>**/*</include>
                 </includes>
             </resource>
-            <resource>
-                <directory>src/test/resources</directory>
-                <filtering>true</filtering>
-                <includes>
-                    <include>**/*</include>
-                </includes>
-            </resource>
         </resources>
 
         <plugins>
@@ -277,7 +276,8 @@
                     <packagingExcludes>
                         WEB-INF/lib/javaps-iohandler-${version.iohandler}.jar,
                         WEB-INF/lib/javaps-test-processes-${version.test.processes}.jar,
-                        WEB-INF/lib/xmlbeans-${version.xmlbeans}.jar
+                        WEB-INF/lib/xmlbeans-${version.xmlbeans}.jar,
+                        WEB-INF/lib/engine-${project.version}-tests.jar
                     </packagingExcludes>
                 </configuration>
             </plugin>
@@ -297,10 +297,6 @@
     <profiles>
         <profile>
             <id>integration-test</id>
-            <properties>
-                <version.test.processes>2</version.test.processes>
-                <version.iohandler>2</version.iohandler>
-            </properties>
             <build>
                 <plugins>
                     <plugin>
