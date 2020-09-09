@@ -16,6 +16,7 @@
  */
 package org.n52.javaps.algorithm;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,6 +25,7 @@ import org.n52.javaps.description.impl.TypedProcessDescriptionFactory;
 import org.n52.javaps.engine.ProcessExecutionContext;
 import org.n52.javaps.io.Data;
 import org.n52.javaps.io.literal.xsd.LiteralDoubleType;
+import org.n52.javaps.io.literal.xsd.LiteralIntegerType;
 import org.n52.shetland.ogc.ows.OwsAnyValue;
 import org.n52.shetland.ogc.ows.OwsCode;
 import org.n52.shetland.ogc.wps.description.ProcessInputDescription;
@@ -37,6 +39,7 @@ public class TestAlgorithm3 extends AbstractAlgorithm {
 
 //    public static final OwsCode ID = new OwsCode("org.n52.javaps.algorithm.TestAlgorithm2");
     public static final OwsCode LITERALINPUT_ID = new OwsCode("literalInput");
+    public static final OwsCode LITERALINPUT_DURATION_ID = new OwsCode("duration");
     public static final OwsCode LITERALOUTPUT_ID = new OwsCode("literalOutput");
     private TypedProcessDescriptionFactory descriptionFactory = new TypedProcessDescriptionFactory();
 
@@ -44,6 +47,22 @@ public class TestAlgorithm3 extends AbstractAlgorithm {
     public void execute(ProcessExecutionContext context) throws ExecutionException {
 
         Data<?> data = context.getInputs().get(LITERALINPUT_ID).get(0);
+
+        Data<?> durationData = context.getInputs().get(LITERALINPUT_DURATION_ID) != null ? context.getInputs().get(LITERALINPUT_DURATION_ID).get(0) : null;
+
+        int duration = 0;
+
+        if(durationData != null) {
+            duration = ((BigInteger) durationData.getPayload()).intValue();
+        }
+
+        if (duration != 0) {
+            try {
+                Thread.sleep(duration);
+            } catch (InterruptedException e) {
+                log.error("Could not sleep for: " + duration, e);
+            }
+        }
 
         context.getOutputs().put(LITERALOUTPUT_ID, data);
 
@@ -54,8 +73,10 @@ public class TestAlgorithm3 extends AbstractAlgorithm {
         List<ProcessInputDescription> inputs = new ArrayList<>();
 
         ProcessInputDescription literalInput = descriptionFactory.literalInput().withIdentifier(LITERALINPUT_ID).withType(new LiteralDoubleType()).withDefaultLiteralDataDomain(descriptionFactory.literalDataDomain().withValueDescription(OwsAnyValue.instance())).build();
+        ProcessInputDescription literalInputDuration = descriptionFactory.literalInput().withIdentifier(LITERALINPUT_DURATION_ID).withType(new LiteralIntegerType()).withDefaultLiteralDataDomain(descriptionFactory.literalDataDomain().withValueDescription(OwsAnyValue.instance())).build();
 
         inputs.add(literalInput);
+        inputs.add(literalInputDuration);
 
         List<ProcessOutputDescription> outputs = new ArrayList<>();
 

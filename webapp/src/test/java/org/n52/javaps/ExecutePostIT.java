@@ -39,6 +39,7 @@ import org.n52.geoprocessing.wps.client.model.Result;
 import org.n52.geoprocessing.wps.client.model.StatusInfo;
 import org.n52.geoprocessing.wps.client.model.execution.Data;
 import org.n52.javaps.algorithm.AnnotatedTestAlgorithmCustomId;
+import org.n52.javaps.algorithm.TestAlgorithm3;
 
 public class ExecutePostIT extends Base {
 
@@ -64,6 +65,8 @@ public class ExecutePostIT extends Base {
 
     private ExecuteRequestBuilder annotatedTestAlgorithmCustomIdProcessExecuteRequestBuilder;
     private final String annotatedTestAlgorithmCustomIdProcessIdentifier = AnnotatedTestAlgorithmCustomId.ID;
+    private ExecuteRequestBuilder testAlgorithm3ProcessExecuteRequestBuilder;
+    private final String testAlgorithm3ProcessIdentifier = TestAlgorithm3.class.getCanonicalName();
 
     private ExecuteRequestBuilder multiReferenceBinaryInputAlgorithmExecuteRequestBuilder;
     private final String multiReferenceBinaryInputAlgorithmIdentifier = "org.n52.wps.server.algorithm.test.MultiReferenceBinaryInputAlgorithm";
@@ -105,6 +108,15 @@ public class ExecutePostIT extends Base {
         annotatedTestAlgorithmCustomIdProcessExecuteRequestBuilder = new ExecuteRequestBuilder(annotatedTestAlgorithmCustomIdProcessDescription);
 
         assertThat(annotatedTestAlgorithmCustomIdProcessExecuteRequestBuilder, is(not(nullValue())));
+
+        Process testAlgorithm3ProcessDescription;
+
+        testAlgorithm3ProcessDescription = wpsClient
+                    .getProcessDescription(url, testAlgorithm3ProcessIdentifier, version200);
+
+        testAlgorithm3ProcessExecuteRequestBuilder = new ExecuteRequestBuilder(testAlgorithm3ProcessDescription);
+
+        assertThat(testAlgorithm3ProcessExecuteRequestBuilder, is(not(nullValue())));
 
 //        Process multiReferenceBinaryInputAlgorithmDescription;
 //
@@ -672,67 +684,79 @@ public class ExecutePostIT extends Base {
     public void testExecuteAnnotatedTestAlgorithmCustomIdConcurrency() throws IOException {
         System.out.println("\nRunning testExecuteAnnotatedTestAlgorithmCustomId");
 
-        String statusLocation005 = "";
-
-        String literalValue005 = "0.05";
-
-        try {
-
-            Object responseObject =  createAndSubmitAnnotatedTestAlgorithmCustomIdExecuteForConcurrencyTest(3000, literalValue005);
-
-            assertThat(responseObject, is(not(nullValue())));
-            assertThat(responseObject, is(not(instanceOf(ExceptionReport.class))));
-
-            if (responseObject instanceof StatusInfo) {
-
-                StatusInfo result = (StatusInfo) responseObject;
-
-                statusLocation005 = result.getStatusLocation();
-            }
-        } catch (WPSClientException e) {
-            fail(e.getMessage());
-        }
-
-        String statusLocation006 = "";
-        String literalValue006 = "0.06";
-
-        try {
-
-            Object responseObject =  createAndSubmitAnnotatedTestAlgorithmCustomIdExecuteForConcurrencyTest(1000, literalValue006);
-
-            assertThat(responseObject, is(not(nullValue())));
-            assertThat(responseObject, is(not(instanceOf(ExceptionReport.class))));
-
-            if (responseObject instanceof StatusInfo) {
-
-                StatusInfo result = (StatusInfo) responseObject;
-
-                statusLocation006 = result.getStatusLocation();
-            }
-        } catch (WPSClientException | IOException e) {
-            fail(e.getMessage());
-        }
-
-        System.out.println(statusLocation005);
-        System.out.println(statusLocation006);
-
-        try {
-            Result result005 = (Result) WPSClientSession.getInstance().getResultFromStatusLocation(statusLocation005);
-
-            checkOutputContainsValue(result005, echoProcessLiteralOutputID, literalValue005);
-
-            Result result006 = (Result) WPSClientSession.getInstance().getResultFromStatusLocation(statusLocation006);
-
-            checkOutputContainsValue(result006, echoProcessLiteralOutputID, literalValue006);
-        } catch (WPSClientException | IOException e) {
-            fail(e.getMessage());
-        }
+        testConcurrency(annotatedTestAlgorithmCustomIdProcessExecuteRequestBuilder);
+//        String statusLocation005 = "";
+//
+//        String literalValue005 = "0.05";
+//
+//        try {
+//
+//            Object responseObject =  createAndSubmitExecuteForConcurrencyTest(annotatedTestAlgorithmCustomIdProcessExecuteRequestBuilder, 3000, literalValue005);
+//
+//            assertThat(responseObject, is(not(nullValue())));
+//            assertThat(responseObject, is(not(instanceOf(ExceptionReport.class))));
+//
+//            if (responseObject instanceof StatusInfo) {
+//
+//                StatusInfo result = (StatusInfo) responseObject;
+//
+//                statusLocation005 = result.getStatusLocation();
+//            }
+//        } catch (WPSClientException e) {
+//            fail(e.getMessage());
+//        }
+//
+//        String statusLocation006 = "";
+//        String literalValue006 = "0.06";
+//
+//        try {
+//
+//            Object responseObject =  createAndSubmitExecuteForConcurrencyTest(annotatedTestAlgorithmCustomIdProcessExecuteRequestBuilder, 1000, literalValue006);
+//
+//            assertThat(responseObject, is(not(nullValue())));
+//            assertThat(responseObject, is(not(instanceOf(ExceptionReport.class))));
+//
+//            if (responseObject instanceof StatusInfo) {
+//
+//                StatusInfo result = (StatusInfo) responseObject;
+//
+//                statusLocation006 = result.getStatusLocation();
+//            }
+//        } catch (WPSClientException | IOException e) {
+//            fail(e.getMessage());
+//        }
+//
+//        System.out.println(statusLocation005);
+//        System.out.println(statusLocation006);
+//
+//        try {
+//            Result result005 = (Result) WPSClientSession.getInstance().getResultFromStatusLocation(statusLocation005);
+//
+//            checkOutputContainsValue(result005, echoProcessLiteralOutputID, literalValue005);
+//
+//            Result result006 = (Result) WPSClientSession.getInstance().getResultFromStatusLocation(statusLocation006);
+//
+//            checkOutputContainsValue(result006, echoProcessLiteralOutputID, literalValue006);
+//        } catch (WPSClientException | IOException e) {
+//            fail(e.getMessage());
+//        }
     }
 
     /*Test concurrent process execution*/
     @Test
     public void testExecutePOSTConcurrency() throws IOException {
         System.out.println("\nRunning testExecutePOSTConcurrency");
+        testConcurrency(echoProcessExecuteRequestBuilder);
+    }
+
+    /*Test concurrent process execution*/
+    @Test
+    public void testExecuteTestAlgorithm3POSTConcurrency() throws IOException {
+        System.out.println("\nRunning testExecuteTestAlgorithm3POSTConcurrency");
+        testConcurrency(testAlgorithm3ProcessExecuteRequestBuilder);
+    }
+
+    private void testConcurrency(ExecuteRequestBuilder executeRequestBuilder) throws IOException {
 
         String statusLocation005 = "";
 
@@ -740,7 +764,7 @@ public class ExecutePostIT extends Base {
 
         try {
 
-            Object responseObject =  createAndSubmitEchoProcessExecuteForConcurrencyTest(3000, literalValue005);
+            Object responseObject =  createAndSubmitExecuteForConcurrencyTest(executeRequestBuilder, 3000, literalValue005);
 
             assertThat(responseObject, is(not(nullValue())));
             assertThat(responseObject, is(not(instanceOf(ExceptionReport.class))));
@@ -760,7 +784,7 @@ public class ExecutePostIT extends Base {
 
         try {
 
-            Object responseObject =  createAndSubmitEchoProcessExecuteForConcurrencyTest(1000, literalValue006);
+            Object responseObject =  createAndSubmitExecuteForConcurrencyTest(executeRequestBuilder, 1000, literalValue006);
 
             assertThat(responseObject, is(not(nullValue())));
             assertThat(responseObject, is(not(instanceOf(ExceptionReport.class))));
@@ -789,7 +813,6 @@ public class ExecutePostIT extends Base {
         } catch (WPSClientException | IOException e) {
             fail(e.getMessage());
         }
-
     }
 
 
@@ -1563,34 +1586,18 @@ public class ExecutePostIT extends Base {
         return responseObject;
     }
 //
-    private synchronized Object createAndSubmitEchoProcessExecuteForConcurrencyTest(int duration, String literalValue) throws WPSClientException, IOException {
+    private synchronized Object createAndSubmitExecuteForConcurrencyTest(ExecuteRequestBuilder executeRequestBuilder, int duration, String literalValue) throws WPSClientException, IOException {
 
-        echoProcessExecuteRequestBuilder.reset();
+        executeRequestBuilder.reset();
 
-        echoProcessExecuteRequestBuilder.addLiteralData("duration", "" + duration, null, null, echoProcessLiteralMimeTypeTextXML);
-        echoProcessExecuteRequestBuilder.addLiteralData(echoProcessLiteralInputID, literalValue, null, null, echoProcessLiteralMimeTypeTextXML);
+        executeRequestBuilder.addLiteralData("duration", "" + duration, null, null, echoProcessLiteralMimeTypeTextXML);
+        executeRequestBuilder.addLiteralData(echoProcessLiteralInputID, literalValue, null, null, echoProcessLiteralMimeTypeTextXML);
 
-        echoProcessExecuteRequestBuilder.setResponseDocument(echoProcessLiteralOutputID, null, null, echoProcessLiteralMimeTypeTextXML);
+        executeRequestBuilder.setResponseDocument(echoProcessLiteralOutputID, null, null, echoProcessLiteralMimeTypeTextXML);
 
-        echoProcessExecuteRequestBuilder.setAsynchronousExecute();
+        executeRequestBuilder.setAsynchronousExecute();
 
-        Object responseObject =  WPSClientSession.getInstance().executeAsyncGetResponseImmediately(url, echoProcessExecuteRequestBuilder.getExecute(), version200);
-
-        return responseObject;
-    }
-
-    private synchronized Object createAndSubmitAnnotatedTestAlgorithmCustomIdExecuteForConcurrencyTest(int duration, String literalValue) throws WPSClientException, IOException {
-
-        annotatedTestAlgorithmCustomIdProcessExecuteRequestBuilder.reset();
-
-        annotatedTestAlgorithmCustomIdProcessExecuteRequestBuilder.addLiteralData("duration", "" + duration, null, null, echoProcessLiteralMimeTypeTextXML);
-        annotatedTestAlgorithmCustomIdProcessExecuteRequestBuilder.addLiteralData(echoProcessLiteralInputID, literalValue, null, null, echoProcessLiteralMimeTypeTextXML);
-
-        annotatedTestAlgorithmCustomIdProcessExecuteRequestBuilder.setResponseDocument(echoProcessLiteralOutputID, null, null, echoProcessLiteralMimeTypeTextXML);
-
-        annotatedTestAlgorithmCustomIdProcessExecuteRequestBuilder.setAsynchronousExecute();
-
-        Object responseObject =  WPSClientSession.getInstance().executeAsyncGetResponseImmediately(url, annotatedTestAlgorithmCustomIdProcessExecuteRequestBuilder.getExecute(), version200);
+        Object responseObject =  WPSClientSession.getInstance().executeAsyncGetResponseImmediately(url, executeRequestBuilder.getExecute(), version200);
 
         return responseObject;
     }

@@ -141,14 +141,6 @@
                 </includes>
             </resource>
         </resources>
-<!--         <testResources> -->
-<!--             <testResource> -->
-<!--                 <directory>src/test/resources</directory> -->
-<!--                 <includes> -->
-<!--                     <include>test-components/test-algorithms.xml</include> -->
-<!--                 </includes> -->
-<!--             </testResource> -->
-<!--         </testResources> -->
         <plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -159,12 +151,9 @@
 							<goal>test-jar</goal>
 						</goals>
 					    <configuration>
-<!--                             <includes> -->
-<!--                                 <include>test-components/test-algorithms.xml</include> -->
-<!--                             </includes> -->
                             <excludes>
-                                <exclude>test-components/engine-test.xml</exclude>
-                                <exclude>test-components/literal-types.xml</exclude>
+                                <exclude>components/engine-test.xml</exclude>
+                                <exclude>components/literal-types.xml</exclude>
                                 <exclude>log4j.xml</exclude>
                                 <exclude>wps1266352013022967603.dat</exclude>
                             </excludes>
