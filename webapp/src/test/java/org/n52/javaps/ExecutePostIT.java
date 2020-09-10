@@ -65,8 +65,6 @@ public class ExecutePostIT extends Base {
 
     private ExecuteRequestBuilder annotatedTestAlgorithmCustomIdProcessExecuteRequestBuilder;
     private final String annotatedTestAlgorithmCustomIdProcessIdentifier = AnnotatedTestAlgorithmCustomId.ID;
-    private ExecuteRequestBuilder testAlgorithm3ProcessExecuteRequestBuilder;
-    private final String testAlgorithm3ProcessIdentifier = TestAlgorithm3.class.getCanonicalName();
 
     private ExecuteRequestBuilder multiReferenceBinaryInputAlgorithmExecuteRequestBuilder;
     private final String multiReferenceBinaryInputAlgorithmIdentifier = "org.n52.wps.server.algorithm.test.MultiReferenceBinaryInputAlgorithm";
@@ -108,15 +106,6 @@ public class ExecutePostIT extends Base {
         annotatedTestAlgorithmCustomIdProcessExecuteRequestBuilder = new ExecuteRequestBuilder(annotatedTestAlgorithmCustomIdProcessDescription);
 
         assertThat(annotatedTestAlgorithmCustomIdProcessExecuteRequestBuilder, is(not(nullValue())));
-
-        Process testAlgorithm3ProcessDescription;
-
-        testAlgorithm3ProcessDescription = wpsClient
-                    .getProcessDescription(url, testAlgorithm3ProcessIdentifier, version200);
-
-        testAlgorithm3ProcessExecuteRequestBuilder = new ExecuteRequestBuilder(testAlgorithm3ProcessDescription);
-
-        assertThat(testAlgorithm3ProcessExecuteRequestBuilder, is(not(nullValue())));
 
 //        Process multiReferenceBinaryInputAlgorithmDescription;
 //
@@ -747,13 +736,6 @@ public class ExecutePostIT extends Base {
     public void testExecutePOSTConcurrency() throws IOException {
         System.out.println("\nRunning testExecutePOSTConcurrency");
         testConcurrency(echoProcessExecuteRequestBuilder);
-    }
-
-    /*Test concurrent process execution*/
-    @Test
-    public void testExecuteTestAlgorithm3POSTConcurrency() throws IOException {
-        System.out.println("\nRunning testExecuteTestAlgorithm3POSTConcurrency");
-        testConcurrency(testAlgorithm3ProcessExecuteRequestBuilder);
     }
 
     private void testConcurrency(ExecuteRequestBuilder executeRequestBuilder) throws IOException {
