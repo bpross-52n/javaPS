@@ -32,6 +32,9 @@ import com.google.common.io.Resources;
  */
 public class Base {
 
+    public final String referenceComplexBinaryInputURL = getURL() + "static/testData/raster.tif";
+    public final String referenceComplexXMLInputURL = getURL() + "static/testData/test-data.xml";
+
     static SimpleNamespaceContext usingNamespaces = new SimpleNamespaceContext().withBinding("gmd",
             "http://www.isotc211.org/2005/gmd").withBinding("ogc", "http://www.opengis.net/ogc").withBinding("xlink",
                     "http://www.w3.org/1999/xlink").withBinding("xsi", "http://www.w3.org/2001/XMLSchema-instance")

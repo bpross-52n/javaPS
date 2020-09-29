@@ -23,24 +23,36 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.StringWriter;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.n52.geoprocessing.wps.client.ExecuteRequestBuilder;
 import org.n52.geoprocessing.wps.client.WPSClientException;
 import org.n52.geoprocessing.wps.client.WPSClientSession;
 import org.n52.geoprocessing.wps.client.model.ExceptionReport;
+import org.n52.geoprocessing.wps.client.model.Format;
 import org.n52.geoprocessing.wps.client.model.Process;
 import org.n52.geoprocessing.wps.client.model.Result;
 import org.n52.geoprocessing.wps.client.model.StatusInfo;
+import org.n52.geoprocessing.wps.client.model.WPSDescriptionParameter;
+import org.n52.geoprocessing.wps.client.model.execution.ComplexDataReference;
 import org.n52.geoprocessing.wps.client.model.execution.Data;
 import org.n52.javaps.algorithm.AnnotatedTestAlgorithmCustomId;
-import org.n52.javaps.algorithm.TestAlgorithm3;
-
 public class ExecutePostIT extends Base {
 
     private final static String TIFF_MAGIC = "<![CDATA[II";
@@ -67,7 +79,8 @@ public class ExecutePostIT extends Base {
     private final String annotatedTestAlgorithmCustomIdProcessIdentifier = AnnotatedTestAlgorithmCustomId.ID;
 
     private ExecuteRequestBuilder multiReferenceBinaryInputAlgorithmExecuteRequestBuilder;
-    private final String multiReferenceBinaryInputAlgorithmIdentifier = "org.n52.wps.server.algorithm.test.MultiReferenceBinaryInputAlgorithm";
+    private final String multiReferenceBinaryInputAlgorithmIdentifier = "org.n52.javaps.test.MultiReferenceBinaryInputAlgorithm";
+    private Process multiReferenceBinaryInputAlgorithmDescription;
     private final String multiReferenceBinaryInputAlgorithmComplexInputID = "data";
     private final String multiReferenceBinaryInputAlgorithmComplexOutputID = "result";
     private final String multiReferenceBinaryInputAlgorithmComplexMimeTypeImageTiff= "image/tiff";
@@ -107,36 +120,34 @@ public class ExecutePostIT extends Base {
 
         assertThat(annotatedTestAlgorithmCustomIdProcessExecuteRequestBuilder, is(not(nullValue())));
 
-//        Process multiReferenceBinaryInputAlgorithmDescription;
-//
-//            multiReferenceBinaryInputAlgorithmDescription = wpsClient
-//                    .getProcessDescription(url, multiReferenceBinaryInputAlgorithmIdentifier, version200);
-//
-//            multiReferenceBinaryInputAlgorithmExecuteRequestBuilder = new ExecuteRequestBuilder(multiReferenceBinaryInputAlgorithmDescription);
-//
-//
-//        assertThat(multiReferenceBinaryInputAlgorithmExecuteRequestBuilder, is(not(nullValue())));
-//
-//        InputStream tiffImageInputStream = getClass().getResourceAsStream("/Execute/image.tiff.base64");
-//
-//        BufferedReader tiffImageInputStreamReader = new BufferedReader(new InputStreamReader(tiffImageInputStream));
-//
-//        StringBuilder tiffImageInputStringBuilder = new StringBuilder();
-//
-//        String line = "";
-//
-//        try {
-//            while ((line = tiffImageInputStreamReader.readLine()) != null) {
-//                tiffImageInputStringBuilder.append(line);
-//            }
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//
-//        tiffImageBinaryInputAsBase64String = tiffImageInputStringBuilder.toString();
-//
-//        assertThat(tiffImageBinaryInputAsBase64String, is(not(nullValue())));
-//        assertThat(tiffImageBinaryInputAsBase64String, is(not(equalTo(""))));
+        multiReferenceBinaryInputAlgorithmDescription = wpsClient
+                    .getProcessDescription(url, multiReferenceBinaryInputAlgorithmIdentifier, version200);
+
+            multiReferenceBinaryInputAlgorithmExecuteRequestBuilder = new ExecuteRequestBuilder(multiReferenceBinaryInputAlgorithmDescription);
+
+
+        assertThat(multiReferenceBinaryInputAlgorithmExecuteRequestBuilder, is(not(nullValue())));
+
+        InputStream tiffImageInputStream = getClass().getResourceAsStream("/Execute/image.tiff.base64");
+
+        BufferedReader tiffImageInputStreamReader = new BufferedReader(new InputStreamReader(tiffImageInputStream));
+
+        StringBuilder tiffImageInputStringBuilder = new StringBuilder();
+
+        String line = "";
+
+        try {
+            while ((line = tiffImageInputStreamReader.readLine()) != null) {
+                tiffImageInputStringBuilder.append(line);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        tiffImageBinaryInputAsBase64String = tiffImageInputStringBuilder.toString();
+
+        assertThat(tiffImageBinaryInputAsBase64String, is(not(nullValue())));
+        assertThat(tiffImageBinaryInputAsBase64String, is(not(equalTo(""))));
 
     }
 //
@@ -366,91 +377,45 @@ public class ExecutePostIT extends Base {
 //
 //    }
 //
-//    private Object createAndSubmitMultiReferenceBinaryInputAlgorithmExecuteWithResponseDocument(List<InputType> inputs, boolean status, boolean storeSupport, boolean asReference) throws WPSClientException{
+
 //
-//        multiReferenceBinaryInputAlgorithmExecuteRequestBuilder.addComplexDataReference(multiReferenceBinaryInputAlgorithmComplexInputID,
-//                                                                                        AllTestsIT.referenceComplexBinaryInputURL,
-//                                                                                        null,
-//                                                                                        null,
-//                                                                                        multiReferenceBinaryInputAlgorithmComplexMimeTypeImageTiff);
-//
-//        multiReferenceBinaryInputAlgorithmExecuteRequestBuilder.addComplexDataReference(multiReferenceBinaryInputAlgorithmComplexInputID,
-//                                                                                        AllTestsIT.referenceComplexBinaryInputURL,
-//                                                                                        null,
-//                                                                                        null,
-//                                                                                        multiReferenceBinaryInputAlgorithmComplexMimeTypeImageTiff);
-//
-//        multiReferenceBinaryInputAlgorithmExecuteRequestBuilder.setResponseDocument(multiReferenceBinaryInputAlgorithmComplexOutputID, null, "base64", multiReferenceBinaryInputAlgorithmComplexMimeTypeImageTiff);
-//
-//        multiReferenceBinaryInputAlgorithmExecuteRequestBuilder.setStoreSupport(multiReferenceBinaryInputAlgorithmComplexOutputID, storeSupport);
-//        multiReferenceBinaryInputAlgorithmExecuteRequestBuilder.setStatus(multiReferenceBinaryInputAlgorithmComplexOutputID, status);
-//        multiReferenceBinaryInputAlgorithmExecuteRequestBuilder.setAsReference(multiReferenceBinaryInputAlgorithmComplexOutputID, asReference);
-//
-//        Object responseObject =  WPSClientSession.getInstance().execute(url, multiReferenceBinaryInputAlgorithmExecuteRequestBuilder.getExecute());
-//
-//        return responseObject;
-//    }
-//
-//    /*Multiple complex XML Input by reference */
+//    /*Complex binary Input by value */
 //    @Test
-//    public void testExecutePOSTMultipleReferenceComplexBinarySynchronousBinaryOutput() throws IOException, ParserConfigurationException, SAXException {
-//        System.out.println("\nRunning testExecutePOSTMultipleReferenceComplexBinarySynchronousBinaryOutput");
-//
-//        try {
-//
-//            Object responseObject =  createAndSubmitMultiReferenceBinaryInputAlgorithmExecuteWithResponseDocument(false, false, false);
-//
-//            assertThat(responseObject, is(not(nullValue())));
-//            assertThat(responseObject, is(not(instanceOf(ExceptionReportDocument.class))));
-//
-//            if (responseObject instanceof ExecuteResponseDocument) {
-//
-//                ExecuteResponseDocument executeResponseDocument = (ExecuteResponseDocument)responseObject;
-//
-//                checkIdentifier(executeResponseDocument, multiReferenceBinaryInputAlgorithmComplexOutputID);
-//            }
-//        } catch (WPSClientException e) {
-//            e.printStackTrace();
-//        }
-//    }
-//
-//    /*Complex XML Input by reference, POST*/
-//    @Test
-//    public void testExecutePOSTReferenceComplexXMLSynchronousXMLOutput_WFS_POST_MissingMimeType() throws IOException, ParserConfigurationException, SAXException {
-//        System.out.println("\nRunning testExecutePOSTReferenceComplexXMLSynchronousXMLOutput_WFS_POST_MissingMimeType");
-//
-//        echoProcessExecuteRequestBuilder.addComplexDataReference(echoProcessComplexInputID, AllTestsIT.referenceComplexXMLInputURL, null, null, echoProcessComplexMimeTypeTextXML);
-//
-//        echoProcessExecuteRequestBuilder.setRawData(echoProcessComplexOutputID, null, null, echoProcessComplexMimeTypeTextXML);
-//
+//    public void testExecutePOSTInlineAndReferenceComplexBinaryASynchronousBinaryOutput() throws IOException, ParserConfigurationException, SAXException {
+//        System.out.println("\nRunning testExecutePOSTInlineAndReferenceComplexBinaryASynchronousBinaryOutput");
 //        String payload = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>"
-//                +"<wps:Execute service=\"WPS\" version=\"1.0.0\" xmlns:wps=\"http://www.opengis.net/wps/1.0.0\" xmlns:ows=\"http://www.opengis.net/ows/1.1\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://www.opengis.net/wps/1.0.0"
-//                +"    http://schemas.opengis.net/wps/1.0.0/wpsExecute_request.xsd\">"
-//                +"    <ows:Identifier>org.n52.wps.server.algorithm.test.EchoProcess</ows:Identifier>"
-//                +"    <wps:DataInputs>"
-//                +"        <wps:Input>"
-//                +"            <ows:Identifier>complexInput</ows:Identifier>"
-//                +"            <wps:Reference xlink:href=\"" + AllTestsIT.getURL() + "\">"
-//                +"            <wps:Body>"
-//                + echoProcessExecuteRequestBuilder.getExecute().toString()
-//                +"            </wps:Body>"
-//                +"            </wps:Reference>"
-//                +"        </wps:Input>"
-//                +"    </wps:DataInputs>"
-//                +"    <wps:ResponseForm>"
-//                +"    <wps:ResponseDocument storeExecuteResponse=\"false\">"
-//                +"        <wps:Output asReference=\"false\">"
-//                +"            <ows:Identifier>complexOutput</ows:Identifier>"
-//                +"        </wps:Output>"
-//                +"    </wps:ResponseDocument>"
-//                +"    </wps:ResponseForm>"
-//                +"</wps:Execute>";
+//                + "<wps:Execute service=\"WPS\" version=\"1.0.0\" xmlns:wps=\"http://www.opengis.net/wps/1.0.0\" xmlns:ows=\"http://www.opengis.net/ows/1.1\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://www.opengis.net/wps/1.0.0"
+//                + "http://schemas.opengis.net/wps/1.0.0/wpsExecute_request.xsd\">"
+//                + "<ows:Identifier>org.n52.wps.server.algorithm.test.MultiReferenceBinaryInputAlgorithm</ows:Identifier>"
+//                + "<wps:DataInputs>"
+//                + "<wps:Input>"
+//                + "<ows:Identifier>data</ows:Identifier>"
+//                + "<wps:Data>"
+//                + "<wps:ComplexData mimeType=\"image/tiff\" encoding=\"base64\">"
+//                + tiffImageBinaryInputAsBase64String
+//                + "</wps:ComplexData>"
+//                + "</wps:Data>"
+//                + "</wps:Input>"
+//                + "<wps:Input>"
+//                + "<ows:Identifier>data</ows:Identifier>"
+//                + "<wps:Reference mimeType=\"image/tiff\" xlink:href=\"" + AllTestsIT.referenceComplexBinaryInputURL + "\">"
+//                + "</wps:Reference>"
+//                + "</wps:Input>"
+//                + "</wps:DataInputs>"
+//                + "<wps:ResponseForm>"
+//                + "<wps:ResponseDocument status=\"true\" storeExecuteResponse=\"true\">"
+//                + "<wps:Output encoding=\"base64\" mimeType=\"image/tiff\">"
+//                + "<ows:Identifier>result</ows:Identifier>"
+//                + "</wps:Output>"
+//                + "</wps:ResponseDocument>"
+//                + "</wps:ResponseForm>"
+//                + "</wps:Execute>";
 //        String response = PostClient.sendRequest(url, payload);
-//
-//        assertThat(AllTestsIT.parseXML(response), is(not(nullValue())));
-//        assertThat(response, response, not(containsString("ExceptionReport")));
-//        assertThat(response, response, containsString(testDataNodeName));
+//        AllTestsIT.validateBinaryBase64Async(response);
 //    }
+
+
+
 //
 //    /*Complex binary Input by value */
 //    @Test
@@ -489,76 +454,661 @@ public class ExecutePostIT extends Base {
 //        String response = PostClient.sendRequest(url, payload);
 //        AllTestsIT.validateBinaryBase64Async(response);
 //    }
+
+    //
+//  /*Complex binary Input by reference */
+//  @Test
+//  public void testExecutePOSTReferenceComplexBinaryASynchronousBinaryOutput() throws IOException, ParserConfigurationException, SAXException {
+//      System.out.println("\nRunning testExecutePOSTReferenceComplexBinaryASynchronousBinaryOutput");
+//      String payload = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>"
+//              + "<wps:Execute service=\"WPS\" version=\"1.0.0\" xmlns:wps=\"http://www.opengis.net/wps/1.0.0\" xmlns:ows=\"http://www.opengis.net/ows/1.1\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://www.opengis.net/wps/1.0.0"
+//              + "http://schemas.opengis.net/wps/1.0.0/wpsExecute_request.xsd\">"
+//              + "<ows:Identifier>org.n52.wps.server.algorithm.test.MultiReferenceBinaryInputAlgorithm</ows:Identifier>"
+//              + "<wps:DataInputs>"
+//              + "<wps:Input>"
+//              + "<ows:Identifier>data</ows:Identifier>"
+//              + "<wps:Reference mimeType=\"image/tiff\" xlink:href=\"" + AllTestsIT.referenceComplexBinaryInputURL
+//              + "\">"
+//              + "</wps:Reference>"
+//              + "</wps:Input>"
+//              + "<wps:Input>"
+//              + "<ows:Identifier>data</ows:Identifier>"
+//              + "<wps:Reference mimeType=\"image/tiff\" xlink:href=\"" + AllTestsIT.referenceComplexBinaryInputURL
+//              + "\">"
+//              + "</wps:Reference>"
+//              + "</wps:Input>"
+//              + "</wps:DataInputs>"
+//              + "<wps:ResponseForm>"
+//              + "<wps:ResponseDocument status=\"true\" storeExecuteResponse=\"true\">"
+//              + "<wps:Output encoding=\"base64\" >"
+//              + "<ows:Identifier>result</ows:Identifier>"
+//              + "</wps:Output>"
+//              + "</wps:ResponseDocument>"
+//              + "</wps:ResponseForm>"
+//              + "</wps:Execute>";
+//      String response = PostClient.sendRequest(url, payload);
+//      AllTestsIT.validateBinaryBase64Async(response);
+//  }
 //
-//    /*Complex binary Input by value */
+
+
 //    @Test
-//    public void testExecutePOSTInlineAndReferenceComplexBinaryASynchronousBinaryOutput() throws IOException, ParserConfigurationException, SAXException {
-//        System.out.println("\nRunning testExecutePOSTInlineAndReferenceComplexBinaryASynchronousBinaryOutput");
-//        String payload = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>"
-//                + "<wps:Execute service=\"WPS\" version=\"1.0.0\" xmlns:wps=\"http://www.opengis.net/wps/1.0.0\" xmlns:ows=\"http://www.opengis.net/ows/1.1\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://www.opengis.net/wps/1.0.0"
-//                + "http://schemas.opengis.net/wps/1.0.0/wpsExecute_request.xsd\">"
-//                + "<ows:Identifier>org.n52.wps.server.algorithm.test.MultiReferenceBinaryInputAlgorithm</ows:Identifier>"
-//                + "<wps:DataInputs>"
-//                + "<wps:Input>"
-//                + "<ows:Identifier>data</ows:Identifier>"
-//                + "<wps:Data>"
-//                + "<wps:ComplexData mimeType=\"image/tiff\" encoding=\"base64\">"
-//                + tiffImageBinaryInputAsBase64String
-//                + "</wps:ComplexData>"
-//                + "</wps:Data>"
-//                + "</wps:Input>"
-//                + "<wps:Input>"
-//                + "<ows:Identifier>data</ows:Identifier>"
-//                + "<wps:Reference mimeType=\"image/tiff\" xlink:href=\"" + AllTestsIT.referenceComplexBinaryInputURL + "\">"
-//                + "</wps:Reference>"
-//                + "</wps:Input>"
-//                + "</wps:DataInputs>"
-//                + "<wps:ResponseForm>"
-//                + "<wps:ResponseDocument status=\"true\" storeExecuteResponse=\"true\">"
-//                + "<wps:Output encoding=\"base64\" mimeType=\"image/tiff\">"
-//                + "<ows:Identifier>result</ows:Identifier>"
-//                + "</wps:Output>"
-//                + "</wps:ResponseDocument>"
-//                + "</wps:ResponseForm>"
-//                + "</wps:Execute>";
-//        String response = PostClient.sendRequest(url, payload);
-//        AllTestsIT.validateBinaryBase64Async(response);
+//    public void testExecutePOSTComplexBinaryASynchronousBinaryOutputStoreStatusReferenceTrueHasCorrectSuffix() throws IOException {
+//        System.out.println("\nRunning testExecutePOSTComplexBinaryASynchronousBinaryOutputStoreStatusReferenceTrueHasCorrectSuffix");
+//
+//        try {
+//
+//            Object responseObject =  createAndSubmitMultiReferenceBinaryInputAlgorithmExecuteWithResponseDocument(false, true, true);
+//
+//            assertThat(responseObject, is(not(nullValue())));
+//            assertThat(responseObject, is(not(instanceOf(ExceptionReport.class))));
+//
+//            if (responseObject instanceof Result) {
+//
+//                Result executeResponseDocument = (Result)responseObject;
+//
+//                String response = executeResponseDocument.toString();
+//
+//                assertThat(AllTestsIT.parseXML(response), is(not(nullValue())));
+//                assertThat(response, response, not(containsString("ExceptionReport")));
+//                assertThat(response, response, containsString("statusLocation"));
+//
+//                AllTestsIT.checkContentDispositionOfRetrieveResultServlet(response, null, ".tiff");
+//            }
+//        } catch (WPSClientException e) {
+//            e.printStackTrace();
+//        }
 //    }
 //
-//    /*Complex binary Input by reference */
 //    @Test
-//    public void testExecutePOSTReferenceComplexBinaryASynchronousBinaryOutput() throws IOException, ParserConfigurationException, SAXException {
-//        System.out.println("\nRunning testExecutePOSTReferenceComplexBinaryASynchronousBinaryOutput");
-//        String payload = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>"
-//                + "<wps:Execute service=\"WPS\" version=\"1.0.0\" xmlns:wps=\"http://www.opengis.net/wps/1.0.0\" xmlns:ows=\"http://www.opengis.net/ows/1.1\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://www.opengis.net/wps/1.0.0"
-//                + "http://schemas.opengis.net/wps/1.0.0/wpsExecute_request.xsd\">"
-//                + "<ows:Identifier>org.n52.wps.server.algorithm.test.MultiReferenceBinaryInputAlgorithm</ows:Identifier>"
-//                + "<wps:DataInputs>"
-//                + "<wps:Input>"
-//                + "<ows:Identifier>data</ows:Identifier>"
-//                + "<wps:Reference mimeType=\"image/tiff\" xlink:href=\"" + AllTestsIT.referenceComplexBinaryInputURL
-//                + "\">"
-//                + "</wps:Reference>"
-//                + "</wps:Input>"
-//                + "<wps:Input>"
-//                + "<ows:Identifier>data</ows:Identifier>"
-//                + "<wps:Reference mimeType=\"image/tiff\" xlink:href=\"" + AllTestsIT.referenceComplexBinaryInputURL
-//                + "\">"
-//                + "</wps:Reference>"
-//                + "</wps:Input>"
-//                + "</wps:DataInputs>"
-//                + "<wps:ResponseForm>"
-//                + "<wps:ResponseDocument status=\"true\" storeExecuteResponse=\"true\">"
-//                + "<wps:Output encoding=\"base64\" >"
-//                + "<ows:Identifier>result</ows:Identifier>"
-//                + "</wps:Output>"
-//                + "</wps:ResponseDocument>"
-//                + "</wps:ResponseForm>"
-//                + "</wps:Execute>";
-//        String response = PostClient.sendRequest(url, payload);
-//        AllTestsIT.validateBinaryBase64Async(response);
-//    }
+//    public void testExecutePOSTComplexBinaryASynchronousBinaryOutputStoreStatusReferenceTrueHasCorrectFilename() throws IOException, ParserConfigurationException, SAXException {
+//        System.out.println("\nRunning testExecutePOSTComplexBinaryASynchronousBinaryOutputStoreStatusReferenceTrueHasCorrectFilename");
 //
+//        try {
+//
+//            Object responseObject =  createAndSubmitMultiReferenceBinaryInputAlgorithmExecuteWithResponseDocument(false, true, true);
+//
+//            assertThat(responseObject, is(not(nullValue())));
+//            assertThat(responseObject, is(not(instanceOf(ExceptionReportDocument.class))));
+//
+//            if (responseObject instanceof ExecuteResponseDocument) {
+//
+//                ExecuteResponseDocument executeResponseDocument = (ExecuteResponseDocument)responseObject;
+//
+//                String response = executeResponseDocument.toString();
+//
+//                assertThat(AllTestsIT.parseXML(response), is(not(nullValue())));
+//                assertThat(response, response, not(containsString("ExceptionReport")));
+//                assertThat(response, response, containsString("statusLocation"));
+//
+//                AllTestsIT.checkContentDispositionOfRetrieveResultServlet(response, "result", ".tiff");
+//            }
+//        } catch (WPSClientException e) {
+//            e.printStackTrace();
+//        }
+//    }
+    //
+  @Test
+  public void testExecutePOSTValueComplexBinarySynchronousBinaryOutputBase64() throws IOException {
+      System.out.println("\nRunning testExecutePOSTValueComplexBinarySynchronousBinaryOutputBase64");
+
+      try {
+
+          Object responseObject =  createAndSubmitMultiReferenceBinaryInputAlgorithmExecuteWithResponseDocument(false, false);
+
+          assertThat(responseObject, is(not(nullValue())));
+          assertThat(responseObject, is(not(instanceOf(ExceptionReport.class))));
+
+          if (responseObject instanceof Result) {
+
+              Result result = (Result)responseObject;
+
+              checkInlineResultBase64(result, multiReferenceBinaryInputAlgorithmComplexOutputID);
+          }
+      } catch (WPSClientException e) {
+          e.printStackTrace();
+      }
+  }
+//
+////TODO This test will produce binary data in the XML response, which is not feasible
+////  @Test
+//  public void testExecutePOSTValueComplexBinarySynchronousBinaryOutputNoEncoding() throws IOException, ParserConfigurationException, SAXException {
+//      System.out.println("\nRunning testExecutePOSTValueComplexBinarySynchronousBinaryOutputNoEncoding");
+//
+//      try {
+//
+//          Object responseObject =  createAndSubmitMultiReferenceBinaryInputAlgorithmExecuteWithResponseDocument(false, false, false, null);
+//
+//          assertThat(responseObject, is(not(nullValue())));
+//          assertThat(responseObject, is(not(instanceOf(ExceptionReportDocument.class))));
+//
+//          if (responseObject instanceof ExecuteResponseDocument) {
+//
+//              ExecuteResponseDocument executeResponseDocument = (ExecuteResponseDocument)responseObject;
+//
+//              String response = executeResponseDocument.toString();
+//
+//              assertThat(AllTestsIT.parseXML(response), is(not(nullValue())));
+//              assertThat(response, response, not(containsString("ExceptionReport")));
+//              assertThat(response, response, containsString("ExecuteResponse"));
+//              assertThat(response, response, containsString(base64TiffStart));
+//          }
+//      } catch (WPSClientException e) {
+//          e.printStackTrace();
+//      }
+//  }
+//
+  @Test
+  public void testExecutePOSTValueComplexBinarySynchronousBinaryOutputAsReferenceBase64() throws IOException {
+      System.out.println("\nRunning testExecutePOSTValueComplexBinarySynchronousBinaryOutputAsReferenceBase64");
+
+      try {
+
+          Object responseObject =  createAndSubmitMultiReferenceBinaryInputAlgorithmExecuteWithResponseDocument(false, true);
+
+          assertThat(responseObject, is(not(nullValue())));
+          assertThat(responseObject, is(not(instanceOf(ExceptionReport.class))));
+
+          if (responseObject instanceof Result) {
+
+              Result result = (Result)responseObject;
+
+              checkReferenceResultBase64(result, multiReferenceBinaryInputAlgorithmComplexOutputID);
+          }
+      } catch (WPSClientException e) {
+          e.printStackTrace();
+      }
+  }
+
+  @Test
+  public void testExecutePOSTValueComplexBinarySynchronousBinaryOutputAsReferenceNoEncoding() throws IOException {
+      System.out.println("\nRunning testExecutePOSTValueComplexBinarySynchronousBinaryOutputAsReferenceNoEncoding");
+
+      try {
+
+          Object responseObject =  createAndSubmitMultiReferenceBinaryInputAlgorithmExecuteWithResponseDocument(false, true, null);
+
+          assertThat(responseObject, is(not(nullValue())));
+          assertThat(responseObject, is(not(instanceOf(ExceptionReport.class))));
+
+          assertThat(responseObject, is(not(nullValue())));
+          assertThat(responseObject, is(not(instanceOf(ExceptionReport.class))));
+
+          if (responseObject instanceof Result) {
+
+              Result result = (Result)responseObject;
+
+              Format defaultFormat = getDefaultFormat(multiReferenceBinaryInputAlgorithmDescription, multiReferenceBinaryInputAlgorithmComplexOutputID);
+
+              checkReferenceResultFormat(result, multiReferenceBinaryInputAlgorithmComplexOutputID, defaultFormat);
+//              AllTestsIT.checkReferenceBinaryResultDefault(response);
+          }
+      } catch (WPSClientException e) {
+          e.printStackTrace();
+      }
+  }
+
+
+    //  @Test
+//  public void testExecutePOSTValueComplexBinarySynchronousBinaryOutputStatusBase64() throws ParserConfigurationException, SAXException, IOException {
+//      System.out.println("\nRunning testExecutePOSTValueComplexBinarySynchronousBinaryOutputStatusBase64");
+//
+//      try {
+//
+//          Object responseObject =  createAndSubmitMultiReferenceBinaryInputAlgorithmExecuteWithResponseDocument(true, false, false);
+//
+//          assertThat(responseObject, is(not(nullValue())));
+//          assertThat(responseObject, is(not(instanceOf(ExceptionReportDocument.class))));
+//
+//          if (responseObject instanceof ExecuteResponseDocument) {
+//
+//              ExecuteResponseDocument executeResponseDocument = (ExecuteResponseDocument)responseObject;
+//
+//              String response = executeResponseDocument.toString();
+//
+//              assertThat(AllTestsIT.parseXML(response), is(not(nullValue())));
+//              assertThat(response, response, not(containsString("ExceptionReport")));
+//              assertThat(response, response, containsString("ExecuteResponse"));
+//              assertThat(response, response, containsString("Status"));
+//              AllTestsIT.checkInlineResultBase64(response);
+//          }
+//      } catch (WPSClientException e) {
+//          e.printStackTrace();
+//      }
+//  }
+//
+////TODO This test will produce binary data in the XML response, which is not feasible
+////  @Test
+//  public void testExecutePOSTValueComplexBinarySynchronousBinaryOutputStatusNoEncoding() throws ParserConfigurationException, SAXException, IOException {
+//      System.out.println("\nRunning testExecutePOSTValueComplexBinarySynchronousBinaryOutputStatusNoEncoding");
+//
+//      try {
+//
+//          Object responseObject =  createAndSubmitMultiReferenceBinaryInputAlgorithmExecuteWithResponseDocument(true, false, false, null);
+//
+//          assertThat(responseObject, is(not(nullValue())));
+//          assertThat(responseObject, is(not(instanceOf(ExceptionReportDocument.class))));
+//
+//          if (responseObject instanceof ExecuteResponseDocument) {
+//
+//              ExecuteResponseDocument executeResponseDocument = (ExecuteResponseDocument)responseObject;
+//
+//              String response = executeResponseDocument.toString();
+//
+//              assertThat(AllTestsIT.parseXML(response), is(not(nullValue())));
+//              assertThat(response, response, not(containsString("ExceptionReport")));
+//              assertThat(response, response, containsString("ProcessSucceeded"));
+//              assertThat(response, response, containsString(base64TiffStart));
+//          }
+//      } catch (WPSClientException e) {
+//          e.printStackTrace();
+//      }
+//  }
+//
+//  @Test
+//  public void testExecutePOSTValueComplexBinarySynchronousBinaryOutputAsReferenceStatusBase64() throws IOException, ParserConfigurationException, SAXException {
+//      System.out.println("\nRunning testExecutePOSTValueComplexBinarySynchronousBinaryOutputAsReferenceStatusBase64");
+//
+//      try {
+//
+//          Object responseObject =  createAndSubmitMultiReferenceBinaryInputAlgorithmExecuteWithResponseDocument(true, false, true);
+//
+//          assertThat(responseObject, is(not(nullValue())));
+//          assertThat(responseObject, is(not(instanceOf(ExceptionReportDocument.class))));
+//
+//          if (responseObject instanceof ExecuteResponseDocument) {
+//
+//              ExecuteResponseDocument executeResponseDocument = (ExecuteResponseDocument)responseObject;
+//
+//              String response = executeResponseDocument.toString();
+//
+//              assertThat(AllTestsIT.parseXML(response), is(not(nullValue())));
+//              assertThat(response, response, not(containsString("ExceptionReport")));
+//              assertThat(response, response, containsString("Status"));
+//              AllTestsIT.checkReferenceBinaryResultBase64(response);
+//          }
+//      } catch (WPSClientException e) {
+//          e.printStackTrace();
+//      }
+//  }
+//
+//  @Test
+//  public void testExecutePOSTValueComplexBinarySynchronousBinaryOutputAsReferenceStatusNoEncoding() throws IOException, ParserConfigurationException, SAXException {
+//      System.out.println("\nRunning testExecutePOSTValueComplexBinarySynchronousBinaryOutputAsReferenceStatusNoEncoding");
+//
+//      try {
+//
+//          Object responseObject =  createAndSubmitMultiReferenceBinaryInputAlgorithmExecuteWithResponseDocument(true, false, true, null);
+//
+//          assertThat(responseObject, is(not(nullValue())));
+//          assertThat(responseObject, is(not(instanceOf(ExceptionReportDocument.class))));
+//
+//          if (responseObject instanceof ExecuteResponseDocument) {
+//
+//              ExecuteResponseDocument executeResponseDocument = (ExecuteResponseDocument)responseObject;
+//
+//              String response = executeResponseDocument.toString();
+//
+//              assertThat(AllTestsIT.parseXML(response), is(not(nullValue())));
+//              assertThat(response, response, not(containsString("ExceptionReport")));
+//              assertThat(response, response, containsString("Status"));
+//              AllTestsIT.checkReferenceBinaryResultDefault(response);
+//          }
+//      } catch (WPSClientException e) {
+//          e.printStackTrace();
+//      }
+//  }
+//
+//  @Test
+//  public void testExecutePOSTValueComplexBinaryASynchronousBinaryOutputStoreBase64() throws IOException, ParserConfigurationException, SAXException {
+//      System.out.println("\nRunning testExecutePOSTValueComplexBinaryASynchronousBinaryOutputStoreBase64");
+//
+//      try {
+//
+//          Object responseObject =  createAndSubmitMultiReferenceBinaryInputAlgorithmExecuteWithResponseDocument(false, true, false);
+//
+//          assertThat(responseObject, is(not(nullValue())));
+//          assertThat(responseObject, is(not(instanceOf(ExceptionReportDocument.class))));
+//
+//          if (responseObject instanceof ExecuteResponseDocument) {
+//
+//              ExecuteResponseDocument executeResponseDocument = (ExecuteResponseDocument)responseObject;
+//
+//              String response = executeResponseDocument.toString();
+//
+//              assertThat(AllTestsIT.parseXML(response), is(not(nullValue())));
+//              assertThat(response, response, not(containsString("ExceptionReport")));
+//              assertThat(response, response, containsString("Status"));
+//              AllTestsIT.validateBinaryBase64Async(response);
+//          }
+//      } catch (WPSClientException e) {
+//          e.printStackTrace();
+//      }
+//  }
+//
+////TODO This test will produce binary data in the XML response, which is not feasible
+////  @Test
+//  public void testExecutePOSTValueComplexBinaryASynchronousBinaryOutputStoreNoEncoding() throws IOException, ParserConfigurationException, SAXException {
+//      System.out.println("\nRunning testExecutePOSTValueComplexBinaryASynchronousBinaryOutputStoreNoEncoding");
+//
+//      try {
+//
+//          Object responseObject =  createAndSubmitMultiReferenceBinaryInputAlgorithmExecuteWithResponseDocument(false, true, false, null);
+//
+//          assertThat(responseObject, is(not(nullValue())));
+//          assertThat(responseObject, is(not(instanceOf(ExceptionReportDocument.class))));
+//
+//          if (responseObject instanceof ExecuteResponseDocument) {
+//
+//              ExecuteResponseDocument executeResponseDocument = (ExecuteResponseDocument)responseObject;
+//
+//              String response = executeResponseDocument.toString();
+//
+//              String async = AllTestsIT.getAsyncDoc(response);
+//              assertThat(AllTestsIT.parseXML(async), is(not(nullValue())));
+//              assertThat(async, async, not(containsString("ExceptionReport")));
+//              assertThat(async, async, containsString("ProcessSucceeded"));
+//              assertThat(async, async, containsString(base64TiffStart));
+//          }
+//      } catch (WPSClientException e) {
+//          e.printStackTrace();
+//      }
+//  }
+//
+//  @Test
+//  public void testExecutePOSTValueComplexBinaryASynchronousBinaryOutputStoreReferenceBase64() throws IOException, ParserConfigurationException, SAXException {
+//      System.out.println("\nRunning testExecutePOSTValueComplexBinaryASynchronousBinaryOutputStoreReferenceBase64");
+//
+//      try {
+//
+//          Object responseObject =  createAndSubmitMultiReferenceBinaryInputAlgorithmExecuteWithResponseDocument(false, true, true);
+//
+//          assertThat(responseObject, is(not(nullValue())));
+//          assertThat(responseObject, is(not(instanceOf(ExceptionReportDocument.class))));
+//
+//          if (responseObject instanceof ExecuteResponseDocument) {
+//
+//              ExecuteResponseDocument executeResponseDocument = (ExecuteResponseDocument)responseObject;
+//
+//              String response = executeResponseDocument.toString();
+//
+//              String asynDoc = AllTestsIT.getAsyncDoc(response);
+//              assertThat(AllTestsIT.parseXML(asynDoc), is(not(nullValue())));
+//              assertThat(asynDoc, asynDoc, not(containsString("ExceptionReport")));
+//              AllTestsIT.checkReferenceBinaryResultBase64(asynDoc);
+//          }
+//      } catch (WPSClientException e) {
+//          e.printStackTrace();
+//      }
+//  }
+//
+//  @Test
+//  public void testExecutePOSTValueComplexBinaryASynchronousBinaryOutputStoreReferenceNoEncoding() throws IOException, ParserConfigurationException, SAXException {
+//      System.out.println("\nRunning testExecutePOSTValueComplexBinaryASynchronousBinaryOutputStoreReferenceNoEncoding");
+//
+//      try {
+//
+//          Object responseObject =  createAndSubmitMultiReferenceBinaryInputAlgorithmExecuteWithResponseDocument(false, true, true, null);
+//
+//          assertThat(responseObject, is(not(nullValue())));
+//          assertThat(responseObject, is(not(instanceOf(ExceptionReportDocument.class))));
+//
+//          if (responseObject instanceof ExecuteResponseDocument) {
+//
+//              ExecuteResponseDocument executeResponseDocument = (ExecuteResponseDocument)responseObject;
+//
+//              String response = executeResponseDocument.toString();
+//
+//              assertThat(response, response, not(containsString("ExceptionReport")));
+//              assertThat(AllTestsIT.parseXML(response), is(not(nullValue())));
+//              String asynDoc = AllTestsIT.getAsyncDoc(response);
+//              AllTestsIT.checkReferenceBinaryResultDefault(asynDoc);
+//          }
+//      } catch (WPSClientException e) {
+//          e.printStackTrace();
+//      }
+//  }
+//
+//  @Test
+//  public void testExecutePOSTValueComplexBinaryASynchronousBinaryOutputStoreStatusBase64() throws IOException, ParserConfigurationException, SAXException {
+//      System.out.println("\nRunning testExecutePOSTValueComplexBinaryASynchronousBinaryOutputStoreStatusBase64");
+//
+//      try {
+//
+//          Object responseObject =  createAndSubmitMultiReferenceBinaryInputAlgorithmExecuteWithResponseDocument(true, true, false);
+//
+//          assertThat(responseObject, is(not(nullValue())));
+//          assertThat(responseObject, is(not(instanceOf(ExceptionReportDocument.class))));
+//
+//          if (responseObject instanceof ExecuteResponseDocument) {
+//
+//              ExecuteResponseDocument executeResponseDocument = (ExecuteResponseDocument)responseObject;
+//
+//              String response = executeResponseDocument.toString();
+//
+//              assertThat(response, response, not(containsString("ExceptionReport")));
+//              assertThat(response, response, containsString("Status"));
+//              AllTestsIT.validateBinaryBase64Async(response);
+//          }
+//      } catch (WPSClientException e) {
+//          e.printStackTrace();
+//      }
+//  }
+//
+//  //TODO This test will produce binary data in the XML response, which is not feasible
+////  @Test
+//  public void testExecutePOSTValueComplexBinaryASynchronousBinaryOutputStoreStatusNoEncoding() throws IOException, ParserConfigurationException, SAXException {
+//      System.out.println("\nRunning testExecutePOSTValueComplexBinaryASynchronousBinaryOutputStoreStatusNoEncoding");
+//
+//      try {
+//
+//          Object responseObject =  createAndSubmitMultiReferenceBinaryInputAlgorithmExecuteWithResponseDocument(true, true, false, null);
+//
+//          assertThat(responseObject, is(not(nullValue())));
+//          assertThat(responseObject, is(not(instanceOf(ExceptionReportDocument.class))));
+//
+//          if (responseObject instanceof ExecuteResponseDocument) {
+//
+//              ExecuteResponseDocument executeResponseDocument = (ExecuteResponseDocument)responseObject;
+//
+//              String response = executeResponseDocument.toString();
+//
+//              String asyncDoc = AllTestsIT.getAsyncDoc(response);
+//              assertThat(AllTestsIT.parseXML(response), is(not(nullValue())));
+//              assertThat(asyncDoc, asyncDoc, containsString("ProcessSucceeded"));
+//              assertThat(asyncDoc, asyncDoc, containsString(base64TiffStart));
+//          }
+//      } catch (WPSClientException e) {
+//          e.printStackTrace();
+//      }
+//  }
+//
+//  @Test
+//  public void testExecutePOSTValueComplexBinaryASynchronousBinaryOutputRawBase64() throws IOException, ParserConfigurationException, SAXException {
+//      System.out.println("\nRunning testExecutePOSTValueComplexBinaryASynchronousBinaryOutputRawBase64");
+//
+//      try {
+//
+//          Object responseObject =  createAndSubmitMultiReferenceBinaryInputAlgorithmExecuteWithResponseDocument(true, true, true);
+//
+//          assertThat(responseObject, is(not(nullValue())));
+//          assertThat(responseObject, is(not(instanceOf(ExceptionReportDocument.class))));
+//
+//          if (responseObject instanceof ExecuteResponseDocument) {
+//
+//              ExecuteResponseDocument executeResponseDocument = (ExecuteResponseDocument)responseObject;
+//
+//              String response = executeResponseDocument.toString();
+//              assertThat(response, response, not(containsString("ExceptionReport")));
+//              assertThat(response, response, containsString("Status"));
+//              assertThat(AllTestsIT.parseXML(response), is(not(nullValue())));
+//              String refDoc = AllTestsIT.getAsyncDoc(response);
+//              AllTestsIT.checkReferenceBinaryResultBase64(refDoc);
+//          }
+//      } catch (WPSClientException e) {
+//          e.printStackTrace();
+//      }
+//  }
+//
+//  @Test
+//  public void testExecutePOSTValueComplexBinaryASynchronousBinaryOutputReferenceStoreStatusNoEncoding() throws IOException, ParserConfigurationException, SAXException {
+//      System.out.println("\nRunning testExecutePOSTValueComplexBinaryASynchronousBinaryOutputReferenceStoreStatusNoEncoding");
+//
+//      try {
+//
+//          Object responseObject =  createAndSubmitMultiReferenceBinaryInputAlgorithmExecuteWithResponseDocument(true, true, true, null);
+//
+//          assertThat(responseObject, is(not(nullValue())));
+//          assertThat(responseObject, is(not(instanceOf(ExceptionReportDocument.class))));
+//
+//          if (responseObject instanceof ExecuteResponseDocument) {
+//
+//              ExecuteResponseDocument executeResponseDocument = (ExecuteResponseDocument)responseObject;
+//
+//              String response = executeResponseDocument.toString();
+//
+//              assertThat(response, response, not(containsString("ExceptionReport")));
+//              assertThat(response, response, containsString("Status"));
+//              assertThat(AllTestsIT.parseXML(response), is(not(nullValue())));
+//              String refDoc = AllTestsIT.getAsyncDoc(response);
+//              AllTestsIT.checkReferenceBinaryResultDefault(refDoc);
+//          }
+//      } catch (WPSClientException e) {
+//          e.printStackTrace();
+//      }
+//  }
+//
+//  @Test
+//  public void testExecutePOSTValueComplexBinarySynchronousBinaryOutputRawbase64() throws IOException {
+//      System.out.println("\nRunning testExecutePOSTValueComplexBinarySynchronousBinaryOutputRawbase64");
+//
+//      try {
+//
+//          Object responseObject =  createAndSubmitMultiReferenceBinaryInputAlgorithmExecuteWithRawData(true, true, true, "base64");
+//
+//          assertThat(responseObject, is(not(nullValue())));
+//          assertThat(responseObject, is(not(instanceOf(ExceptionReportDocument.class))));
+//
+//          if (responseObject instanceof InputStream) {
+//
+//              AllTestsIT.checkRawBinaryResultBase64((InputStream) responseObject);
+//          }
+//      } catch (WPSClientException e) {
+//          e.printStackTrace();
+//      }
+//  }
+//
+//  @Test
+//  public void testExecutePOSTValueComplexBinarySynchronousBinaryOutputRawNoEncoding() throws IOException {
+//      System.out.println("\nRunning testExecutePOSTValueComplexBinarySynchronousBinaryOutputRawNoEncoding");
+//
+//      try {
+//
+//          Object responseObject =  createAndSubmitMultiReferenceBinaryInputAlgorithmExecuteWithRawData(true, true, true, null);
+//
+//          assertThat(responseObject, is(not(nullValue())));
+//          assertThat(responseObject, is(not(instanceOf(ExceptionReportDocument.class))));
+//
+//          if (responseObject instanceof InputStream) {
+//
+//              AllTestsIT.checkRawBinaryResultDefault((InputStream) responseObject);
+//          }
+//      } catch (WPSClientException e) {
+//          e.printStackTrace();
+//      }
+//  }
+    private Object createAndSubmitMultiReferenceBinaryInputAlgorithmExecuteWithResponseDocument(boolean async, boolean asReference) throws WPSClientException, IOException{
+
+        return createAndSubmitMultiReferenceBinaryInputAlgorithmExecuteWithResponseDocument(async, asReference, "base64");
+    }
+    private Object createAndSubmitMultiReferenceBinaryInputAlgorithmExecuteWithResponseDocument(boolean async, boolean asReference, String outputEncoding) throws WPSClientException, IOException{
+
+        multiReferenceBinaryInputAlgorithmExecuteRequestBuilder.addComplexDataReference(multiReferenceBinaryInputAlgorithmComplexInputID,
+                referenceComplexBinaryInputURL,
+                null,
+                null,
+                multiReferenceBinaryInputAlgorithmComplexMimeTypeImageTiff);
+
+        multiReferenceBinaryInputAlgorithmExecuteRequestBuilder.addComplexDataReference(multiReferenceBinaryInputAlgorithmComplexInputID,
+                referenceComplexBinaryInputURL,
+                null,
+                null,
+                multiReferenceBinaryInputAlgorithmComplexMimeTypeImageTiff);
+
+        multiReferenceBinaryInputAlgorithmExecuteRequestBuilder.setResponseDocument(multiReferenceBinaryInputAlgorithmComplexOutputID, null, outputEncoding, multiReferenceBinaryInputAlgorithmComplexMimeTypeImageTiff);
+
+        multiReferenceBinaryInputAlgorithmExecuteRequestBuilder.setAsReference(multiReferenceBinaryInputAlgorithmComplexOutputID, asReference);
+
+        if(async) {
+            multiReferenceBinaryInputAlgorithmExecuteRequestBuilder.setAsynchronousExecute();
+        }
+
+        Object responseObject =  WPSClientSession.getInstance().execute(url, multiReferenceBinaryInputAlgorithmExecuteRequestBuilder.getExecute(), version200);
+
+        return responseObject;
+    }
+
+    /*Multiple complex XML Input by reference */
+    @Test
+    public void testExecutePOSTMultipleReferenceComplexBinarySynchronousBinaryOutput() throws IOException {
+        System.out.println("\nRunning testExecutePOSTMultipleReferenceComplexBinarySynchronousBinaryOutput");
+
+        try {
+
+            Object responseObject =  createAndSubmitMultiReferenceBinaryInputAlgorithmExecuteWithResponseDocument(false, false);
+
+            assertThat(responseObject, is(not(nullValue())));
+            assertThat(responseObject, is(not(instanceOf(ExceptionReport.class))));
+
+            if (responseObject instanceof Result) {
+
+                Result executeResponseDocument = (Result)responseObject;
+
+                checkIdentifier(executeResponseDocument, multiReferenceBinaryInputAlgorithmComplexOutputID);
+            }
+        } catch (WPSClientException e) {
+            e.printStackTrace();
+        }
+    }
+//
+//    /*Complex XML Input by reference, POST*/
+//    @Test
+//    public void testExecutePOSTReferenceComplexXMLSynchronousXMLOutput_WFS_POST_MissingMimeType() throws IOException, ParserConfigurationException, SAXException {
+//        System.out.println("\nRunning testExecutePOSTReferenceComplexXMLSynchronousXMLOutput_WFS_POST_MissingMimeType");
+//
+//        echoProcessExecuteRequestBuilder.addComplexDataReference(echoProcessComplexInputID, AllTestsIT.referenceComplexXMLInputURL, null, null, echoProcessComplexMimeTypeTextXML);
+//
+//        echoProcessExecuteRequestBuilder.setRawData(echoProcessComplexOutputID, null, null, echoProcessComplexMimeTypeTextXML);
+//
+//        String payload = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>"
+//                +"<wps:Execute service=\"WPS\" version=\"1.0.0\" xmlns:wps=\"http://www.opengis.net/wps/1.0.0\" xmlns:ows=\"http://www.opengis.net/ows/1.1\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://www.opengis.net/wps/1.0.0"
+//                +"    http://schemas.opengis.net/wps/1.0.0/wpsExecute_request.xsd\">"
+//                +"    <ows:Identifier>org.n52.wps.server.algorithm.test.EchoProcess</ows:Identifier>"
+//                +"    <wps:DataInputs>"
+//                +"        <wps:Input>"
+//                +"            <ows:Identifier>complexInput</ows:Identifier>"
+//                +"            <wps:Reference xlink:href=\"" + AllTestsIT.getURL() + "\">"
+//                +"            <wps:Body>"
+//                + echoProcessExecuteRequestBuilder.getExecute().toString()
+//                +"            </wps:Body>"
+//                +"            </wps:Reference>"
+//                +"        </wps:Input>"
+//                +"    </wps:DataInputs>"
+//                +"    <wps:ResponseForm>"
+//                +"    <wps:ResponseDocument storeExecuteResponse=\"false\">"
+//                +"        <wps:Output asReference=\"false\">"
+//                +"            <ows:Identifier>complexOutput</ows:Identifier>"
+//                +"        </wps:Output>"
+//                +"    </wps:ResponseDocument>"
+//                +"    </wps:ResponseForm>"
+//                +"</wps:Execute>";
+//        String response = PostClient.sendRequest(url, payload);
+//
+//        assertThat(AllTestsIT.parseXML(response), is(not(nullValue())));
+//        assertThat(response, response, not(containsString("ExceptionReport")));
+//        assertThat(response, response, containsString(testDataNodeName));
+//    }
+
 //    /*Literal Input by value String */
 //    @Test
 //    public void testExecutePOSTLiteralStringSynchronousXMLOutput() throws IOException, ParserConfigurationException, SAXException {
@@ -671,64 +1221,9 @@ public class ExecutePostIT extends Base {
     /*Complex inline XML Output*/
     @Test
     public void testExecuteAnnotatedTestAlgorithmCustomIdConcurrency() throws IOException {
-        System.out.println("\nRunning testExecuteAnnotatedTestAlgorithmCustomId");
+        System.out.println("\nRunning testExecuteAnnotatedTestAlgorithmCustomIdConcurrency");
 
         testConcurrency(annotatedTestAlgorithmCustomIdProcessExecuteRequestBuilder);
-//        String statusLocation005 = "";
-//
-//        String literalValue005 = "0.05";
-//
-//        try {
-//
-//            Object responseObject =  createAndSubmitExecuteForConcurrencyTest(annotatedTestAlgorithmCustomIdProcessExecuteRequestBuilder, 3000, literalValue005);
-//
-//            assertThat(responseObject, is(not(nullValue())));
-//            assertThat(responseObject, is(not(instanceOf(ExceptionReport.class))));
-//
-//            if (responseObject instanceof StatusInfo) {
-//
-//                StatusInfo result = (StatusInfo) responseObject;
-//
-//                statusLocation005 = result.getStatusLocation();
-//            }
-//        } catch (WPSClientException e) {
-//            fail(e.getMessage());
-//        }
-//
-//        String statusLocation006 = "";
-//        String literalValue006 = "0.06";
-//
-//        try {
-//
-//            Object responseObject =  createAndSubmitExecuteForConcurrencyTest(annotatedTestAlgorithmCustomIdProcessExecuteRequestBuilder, 1000, literalValue006);
-//
-//            assertThat(responseObject, is(not(nullValue())));
-//            assertThat(responseObject, is(not(instanceOf(ExceptionReport.class))));
-//
-//            if (responseObject instanceof StatusInfo) {
-//
-//                StatusInfo result = (StatusInfo) responseObject;
-//
-//                statusLocation006 = result.getStatusLocation();
-//            }
-//        } catch (WPSClientException | IOException e) {
-//            fail(e.getMessage());
-//        }
-//
-//        System.out.println(statusLocation005);
-//        System.out.println(statusLocation006);
-//
-//        try {
-//            Result result005 = (Result) WPSClientSession.getInstance().getResultFromStatusLocation(statusLocation005);
-//
-//            checkOutputContainsValue(result005, echoProcessLiteralOutputID, literalValue005);
-//
-//            Result result006 = (Result) WPSClientSession.getInstance().getResultFromStatusLocation(statusLocation006);
-//
-//            checkOutputContainsValue(result006, echoProcessLiteralOutputID, literalValue006);
-//        } catch (WPSClientException | IOException e) {
-//            fail(e.getMessage());
-//        }
     }
 
     /*Test concurrent process execution*/
@@ -939,539 +1434,6 @@ public class ExecutePostIT extends Base {
 //            e.printStackTrace();
 //        }
 //    }
-//
-//    @Test
-//    public void testExecutePOSTComplexBinaryASynchronousBinaryOutputStoreStatusReferenceTrueHasCorrectSuffix() throws IOException, ParserConfigurationException, SAXException {
-//        System.out.println("\nRunning testExecutePOSTComplexBinaryASynchronousBinaryOutputStoreStatusReferenceTrueHasCorrectSuffix");
-//
-//        try {
-//
-//            Object responseObject =  createAndSubmitMultiReferenceBinaryInputAlgorithmExecuteWithResponseDocument(false, true, true);
-//
-//            assertThat(responseObject, is(not(nullValue())));
-//            assertThat(responseObject, is(not(instanceOf(ExceptionReportDocument.class))));
-//
-//            if (responseObject instanceof ExecuteResponseDocument) {
-//
-//                ExecuteResponseDocument executeResponseDocument = (ExecuteResponseDocument)responseObject;
-//
-//                String response = executeResponseDocument.toString();
-//
-//                assertThat(AllTestsIT.parseXML(response), is(not(nullValue())));
-//                assertThat(response, response, not(containsString("ExceptionReport")));
-//                assertThat(response, response, containsString("statusLocation"));
-//
-//                AllTestsIT.checkContentDispositionOfRetrieveResultServlet(response, null, ".tiff");
-//            }
-//        } catch (WPSClientException e) {
-//            e.printStackTrace();
-//        }
-//    }
-//
-//    @Test
-//    public void testExecutePOSTComplexBinaryASynchronousBinaryOutputStoreStatusReferenceTrueHasCorrectFilename() throws IOException, ParserConfigurationException, SAXException {
-//        System.out.println("\nRunning testExecutePOSTComplexBinaryASynchronousBinaryOutputStoreStatusReferenceTrueHasCorrectFilename");
-//
-//        try {
-//
-//            Object responseObject =  createAndSubmitMultiReferenceBinaryInputAlgorithmExecuteWithResponseDocument(false, true, true);
-//
-//            assertThat(responseObject, is(not(nullValue())));
-//            assertThat(responseObject, is(not(instanceOf(ExceptionReportDocument.class))));
-//
-//            if (responseObject instanceof ExecuteResponseDocument) {
-//
-//                ExecuteResponseDocument executeResponseDocument = (ExecuteResponseDocument)responseObject;
-//
-//                String response = executeResponseDocument.toString();
-//
-//                assertThat(AllTestsIT.parseXML(response), is(not(nullValue())));
-//                assertThat(response, response, not(containsString("ExceptionReport")));
-//                assertThat(response, response, containsString("statusLocation"));
-//
-//                AllTestsIT.checkContentDispositionOfRetrieveResultServlet(response, "result", ".tiff");
-//            }
-//        } catch (WPSClientException e) {
-//            e.printStackTrace();
-//        }
-//    }
-//
-//    @Test
-//    public void testExecutePOSTValueComplexBinarySynchronousBinaryOutputBase64() throws ParserConfigurationException, IOException, SAXException {
-//        System.out.println("\nRunning testExecutePOSTValueComplexBinarySynchronousBinaryOutputBase64");
-//
-//        try {
-//
-//            Object responseObject =  createAndSubmitMultiReferenceBinaryInputAlgorithmExecuteWithResponseDocument(false, false, false);
-//
-//            assertThat(responseObject, is(not(nullValue())));
-//            assertThat(responseObject, is(not(instanceOf(ExceptionReportDocument.class))));
-//
-//            if (responseObject instanceof ExecuteResponseDocument) {
-//
-//                ExecuteResponseDocument executeResponseDocument = (ExecuteResponseDocument)responseObject;
-//
-//                String response = executeResponseDocument.toString();
-//
-//                assertThat(AllTestsIT.parseXML(response), is(not(nullValue())));
-//                assertThat(response, response, not(containsString("ExceptionReport")));
-//                assertThat(response, response, containsString("ExecuteResponse"));
-//                AllTestsIT.checkInlineResultBase64(response);
-//            }
-//        } catch (WPSClientException e) {
-//            e.printStackTrace();
-//        }
-//    }
-//
-//  //TODO This test will produce binary data in the XML response, which is not feasible
-////    @Test
-//    public void testExecutePOSTValueComplexBinarySynchronousBinaryOutputNoEncoding() throws IOException, ParserConfigurationException, SAXException {
-//        System.out.println("\nRunning testExecutePOSTValueComplexBinarySynchronousBinaryOutputNoEncoding");
-//
-//        try {
-//
-//            Object responseObject =  createAndSubmitMultiReferenceBinaryInputAlgorithmExecuteWithResponseDocument(false, false, false, null);
-//
-//            assertThat(responseObject, is(not(nullValue())));
-//            assertThat(responseObject, is(not(instanceOf(ExceptionReportDocument.class))));
-//
-//            if (responseObject instanceof ExecuteResponseDocument) {
-//
-//                ExecuteResponseDocument executeResponseDocument = (ExecuteResponseDocument)responseObject;
-//
-//                String response = executeResponseDocument.toString();
-//
-//                assertThat(AllTestsIT.parseXML(response), is(not(nullValue())));
-//                assertThat(response, response, not(containsString("ExceptionReport")));
-//                assertThat(response, response, containsString("ExecuteResponse"));
-//                assertThat(response, response, containsString(base64TiffStart));
-//            }
-//        } catch (WPSClientException e) {
-//            e.printStackTrace();
-//        }
-//    }
-//
-//    @Test
-//    public void testExecutePOSTValueComplexBinarySynchronousBinaryOutputAsReferenceBase64() throws IOException, ParserConfigurationException, SAXException {
-//        System.out.println("\nRunning testExecutePOSTValueComplexBinarySynchronousBinaryOutputAsReferenceBase64");
-//
-//        try {
-//
-//            Object responseObject =  createAndSubmitMultiReferenceBinaryInputAlgorithmExecuteWithResponseDocument(false, false, true);
-//
-//            assertThat(responseObject, is(not(nullValue())));
-//            assertThat(responseObject, is(not(instanceOf(ExceptionReportDocument.class))));
-//
-//            if (responseObject instanceof ExecuteResponseDocument) {
-//
-//                ExecuteResponseDocument executeResponseDocument = (ExecuteResponseDocument)responseObject;
-//
-//                String response = executeResponseDocument.toString();
-//
-//                assertThat(AllTestsIT.parseXML(response), is(not(nullValue())));
-//                assertThat(response, response, not(containsString("ExceptionReport")));
-//                assertThat(response, response, containsString("ExecuteResponse"));
-//                AllTestsIT.checkReferenceBinaryResultBase64(response);
-//            }
-//        } catch (WPSClientException e) {
-//            e.printStackTrace();
-//        }
-//    }
-//
-//    @Test
-//    public void testExecutePOSTValueComplexBinarySynchronousBinaryOutputAsReferenceNoEncoding() throws IOException, ParserConfigurationException, SAXException {
-//        System.out.println("\nRunning testExecutePOSTValueComplexBinarySynchronousBinaryOutputAsReferenceNoEncoding");
-//
-//        try {
-//
-//            Object responseObject =  createAndSubmitMultiReferenceBinaryInputAlgorithmExecuteWithResponseDocument(false, false, true, null);
-//
-//            assertThat(responseObject, is(not(nullValue())));
-//            assertThat(responseObject, is(not(instanceOf(ExceptionReportDocument.class))));
-//
-//            if (responseObject instanceof ExecuteResponseDocument) {
-//
-//                ExecuteResponseDocument executeResponseDocument = (ExecuteResponseDocument)responseObject;
-//
-//                String response = executeResponseDocument.toString();
-//
-//                assertThat(AllTestsIT.parseXML(response), is(not(nullValue())));
-//                assertThat(response, response, not(containsString("ExceptionReport")));
-//                AllTestsIT.checkReferenceBinaryResultDefault(response);
-//            }
-//        } catch (WPSClientException e) {
-//            e.printStackTrace();
-//        }
-//    }
-//
-//    @Test
-//    public void testExecutePOSTValueComplexBinarySynchronousBinaryOutputStatusBase64() throws ParserConfigurationException, SAXException, IOException {
-//        System.out.println("\nRunning testExecutePOSTValueComplexBinarySynchronousBinaryOutputStatusBase64");
-//
-//        try {
-//
-//            Object responseObject =  createAndSubmitMultiReferenceBinaryInputAlgorithmExecuteWithResponseDocument(true, false, false);
-//
-//            assertThat(responseObject, is(not(nullValue())));
-//            assertThat(responseObject, is(not(instanceOf(ExceptionReportDocument.class))));
-//
-//            if (responseObject instanceof ExecuteResponseDocument) {
-//
-//                ExecuteResponseDocument executeResponseDocument = (ExecuteResponseDocument)responseObject;
-//
-//                String response = executeResponseDocument.toString();
-//
-//                assertThat(AllTestsIT.parseXML(response), is(not(nullValue())));
-//                assertThat(response, response, not(containsString("ExceptionReport")));
-//                assertThat(response, response, containsString("ExecuteResponse"));
-//                assertThat(response, response, containsString("Status"));
-//                AllTestsIT.checkInlineResultBase64(response);
-//            }
-//        } catch (WPSClientException e) {
-//            e.printStackTrace();
-//        }
-//    }
-//
-//  //TODO This test will produce binary data in the XML response, which is not feasible
-////    @Test
-//    public void testExecutePOSTValueComplexBinarySynchronousBinaryOutputStatusNoEncoding() throws ParserConfigurationException, SAXException, IOException {
-//        System.out.println("\nRunning testExecutePOSTValueComplexBinarySynchronousBinaryOutputStatusNoEncoding");
-//
-//        try {
-//
-//            Object responseObject =  createAndSubmitMultiReferenceBinaryInputAlgorithmExecuteWithResponseDocument(true, false, false, null);
-//
-//            assertThat(responseObject, is(not(nullValue())));
-//            assertThat(responseObject, is(not(instanceOf(ExceptionReportDocument.class))));
-//
-//            if (responseObject instanceof ExecuteResponseDocument) {
-//
-//                ExecuteResponseDocument executeResponseDocument = (ExecuteResponseDocument)responseObject;
-//
-//                String response = executeResponseDocument.toString();
-//
-//                assertThat(AllTestsIT.parseXML(response), is(not(nullValue())));
-//                assertThat(response, response, not(containsString("ExceptionReport")));
-//                assertThat(response, response, containsString("ProcessSucceeded"));
-//                assertThat(response, response, containsString(base64TiffStart));
-//            }
-//        } catch (WPSClientException e) {
-//            e.printStackTrace();
-//        }
-//    }
-//
-//    @Test
-//    public void testExecutePOSTValueComplexBinarySynchronousBinaryOutputAsReferenceStatusBase64() throws IOException, ParserConfigurationException, SAXException {
-//        System.out.println("\nRunning testExecutePOSTValueComplexBinarySynchronousBinaryOutputAsReferenceStatusBase64");
-//
-//        try {
-//
-//            Object responseObject =  createAndSubmitMultiReferenceBinaryInputAlgorithmExecuteWithResponseDocument(true, false, true);
-//
-//            assertThat(responseObject, is(not(nullValue())));
-//            assertThat(responseObject, is(not(instanceOf(ExceptionReportDocument.class))));
-//
-//            if (responseObject instanceof ExecuteResponseDocument) {
-//
-//                ExecuteResponseDocument executeResponseDocument = (ExecuteResponseDocument)responseObject;
-//
-//                String response = executeResponseDocument.toString();
-//
-//                assertThat(AllTestsIT.parseXML(response), is(not(nullValue())));
-//                assertThat(response, response, not(containsString("ExceptionReport")));
-//                assertThat(response, response, containsString("Status"));
-//                AllTestsIT.checkReferenceBinaryResultBase64(response);
-//            }
-//        } catch (WPSClientException e) {
-//            e.printStackTrace();
-//        }
-//    }
-//
-//    @Test
-//    public void testExecutePOSTValueComplexBinarySynchronousBinaryOutputAsReferenceStatusNoEncoding() throws IOException, ParserConfigurationException, SAXException {
-//        System.out.println("\nRunning testExecutePOSTValueComplexBinarySynchronousBinaryOutputAsReferenceStatusNoEncoding");
-//
-//        try {
-//
-//            Object responseObject =  createAndSubmitMultiReferenceBinaryInputAlgorithmExecuteWithResponseDocument(true, false, true, null);
-//
-//            assertThat(responseObject, is(not(nullValue())));
-//            assertThat(responseObject, is(not(instanceOf(ExceptionReportDocument.class))));
-//
-//            if (responseObject instanceof ExecuteResponseDocument) {
-//
-//                ExecuteResponseDocument executeResponseDocument = (ExecuteResponseDocument)responseObject;
-//
-//                String response = executeResponseDocument.toString();
-//
-//                assertThat(AllTestsIT.parseXML(response), is(not(nullValue())));
-//                assertThat(response, response, not(containsString("ExceptionReport")));
-//                assertThat(response, response, containsString("Status"));
-//                AllTestsIT.checkReferenceBinaryResultDefault(response);
-//            }
-//        } catch (WPSClientException e) {
-//            e.printStackTrace();
-//        }
-//    }
-//
-//    @Test
-//    public void testExecutePOSTValueComplexBinaryASynchronousBinaryOutputStoreBase64() throws IOException, ParserConfigurationException, SAXException {
-//        System.out.println("\nRunning testExecutePOSTValueComplexBinaryASynchronousBinaryOutputStoreBase64");
-//
-//        try {
-//
-//            Object responseObject =  createAndSubmitMultiReferenceBinaryInputAlgorithmExecuteWithResponseDocument(false, true, false);
-//
-//            assertThat(responseObject, is(not(nullValue())));
-//            assertThat(responseObject, is(not(instanceOf(ExceptionReportDocument.class))));
-//
-//            if (responseObject instanceof ExecuteResponseDocument) {
-//
-//                ExecuteResponseDocument executeResponseDocument = (ExecuteResponseDocument)responseObject;
-//
-//                String response = executeResponseDocument.toString();
-//
-//                assertThat(AllTestsIT.parseXML(response), is(not(nullValue())));
-//                assertThat(response, response, not(containsString("ExceptionReport")));
-//                assertThat(response, response, containsString("Status"));
-//                AllTestsIT.validateBinaryBase64Async(response);
-//            }
-//        } catch (WPSClientException e) {
-//            e.printStackTrace();
-//        }
-//    }
-//
-//  //TODO This test will produce binary data in the XML response, which is not feasible
-////    @Test
-//    public void testExecutePOSTValueComplexBinaryASynchronousBinaryOutputStoreNoEncoding() throws IOException, ParserConfigurationException, SAXException {
-//        System.out.println("\nRunning testExecutePOSTValueComplexBinaryASynchronousBinaryOutputStoreNoEncoding");
-//
-//        try {
-//
-//            Object responseObject =  createAndSubmitMultiReferenceBinaryInputAlgorithmExecuteWithResponseDocument(false, true, false, null);
-//
-//            assertThat(responseObject, is(not(nullValue())));
-//            assertThat(responseObject, is(not(instanceOf(ExceptionReportDocument.class))));
-//
-//            if (responseObject instanceof ExecuteResponseDocument) {
-//
-//                ExecuteResponseDocument executeResponseDocument = (ExecuteResponseDocument)responseObject;
-//
-//                String response = executeResponseDocument.toString();
-//
-//                String async = AllTestsIT.getAsyncDoc(response);
-//                assertThat(AllTestsIT.parseXML(async), is(not(nullValue())));
-//                assertThat(async, async, not(containsString("ExceptionReport")));
-//                assertThat(async, async, containsString("ProcessSucceeded"));
-//                assertThat(async, async, containsString(base64TiffStart));
-//            }
-//        } catch (WPSClientException e) {
-//            e.printStackTrace();
-//        }
-//    }
-//
-//    @Test
-//    public void testExecutePOSTValueComplexBinaryASynchronousBinaryOutputStoreReferenceBase64() throws IOException, ParserConfigurationException, SAXException {
-//        System.out.println("\nRunning testExecutePOSTValueComplexBinaryASynchronousBinaryOutputStoreReferenceBase64");
-//
-//        try {
-//
-//            Object responseObject =  createAndSubmitMultiReferenceBinaryInputAlgorithmExecuteWithResponseDocument(false, true, true);
-//
-//            assertThat(responseObject, is(not(nullValue())));
-//            assertThat(responseObject, is(not(instanceOf(ExceptionReportDocument.class))));
-//
-//            if (responseObject instanceof ExecuteResponseDocument) {
-//
-//                ExecuteResponseDocument executeResponseDocument = (ExecuteResponseDocument)responseObject;
-//
-//                String response = executeResponseDocument.toString();
-//
-//                String asynDoc = AllTestsIT.getAsyncDoc(response);
-//                assertThat(AllTestsIT.parseXML(asynDoc), is(not(nullValue())));
-//                assertThat(asynDoc, asynDoc, not(containsString("ExceptionReport")));
-//                AllTestsIT.checkReferenceBinaryResultBase64(asynDoc);
-//            }
-//        } catch (WPSClientException e) {
-//            e.printStackTrace();
-//        }
-//    }
-//
-//    @Test
-//    public void testExecutePOSTValueComplexBinaryASynchronousBinaryOutputStoreReferenceNoEncoding() throws IOException, ParserConfigurationException, SAXException {
-//        System.out.println("\nRunning testExecutePOSTValueComplexBinaryASynchronousBinaryOutputStoreReferenceNoEncoding");
-//
-//        try {
-//
-//            Object responseObject =  createAndSubmitMultiReferenceBinaryInputAlgorithmExecuteWithResponseDocument(false, true, true, null);
-//
-//            assertThat(responseObject, is(not(nullValue())));
-//            assertThat(responseObject, is(not(instanceOf(ExceptionReportDocument.class))));
-//
-//            if (responseObject instanceof ExecuteResponseDocument) {
-//
-//                ExecuteResponseDocument executeResponseDocument = (ExecuteResponseDocument)responseObject;
-//
-//                String response = executeResponseDocument.toString();
-//
-//                assertThat(response, response, not(containsString("ExceptionReport")));
-//                assertThat(AllTestsIT.parseXML(response), is(not(nullValue())));
-//                String asynDoc = AllTestsIT.getAsyncDoc(response);
-//                AllTestsIT.checkReferenceBinaryResultDefault(asynDoc);
-//            }
-//        } catch (WPSClientException e) {
-//            e.printStackTrace();
-//        }
-//    }
-//
-//    @Test
-//    public void testExecutePOSTValueComplexBinaryASynchronousBinaryOutputStoreStatusBase64() throws IOException, ParserConfigurationException, SAXException {
-//        System.out.println("\nRunning testExecutePOSTValueComplexBinaryASynchronousBinaryOutputStoreStatusBase64");
-//
-//        try {
-//
-//            Object responseObject =  createAndSubmitMultiReferenceBinaryInputAlgorithmExecuteWithResponseDocument(true, true, false);
-//
-//            assertThat(responseObject, is(not(nullValue())));
-//            assertThat(responseObject, is(not(instanceOf(ExceptionReportDocument.class))));
-//
-//            if (responseObject instanceof ExecuteResponseDocument) {
-//
-//                ExecuteResponseDocument executeResponseDocument = (ExecuteResponseDocument)responseObject;
-//
-//                String response = executeResponseDocument.toString();
-//
-//                assertThat(response, response, not(containsString("ExceptionReport")));
-//                assertThat(response, response, containsString("Status"));
-//                AllTestsIT.validateBinaryBase64Async(response);
-//            }
-//        } catch (WPSClientException e) {
-//            e.printStackTrace();
-//        }
-//    }
-//
-//    //TODO This test will produce binary data in the XML response, which is not feasible
-////    @Test
-//    public void testExecutePOSTValueComplexBinaryASynchronousBinaryOutputStoreStatusNoEncoding() throws IOException, ParserConfigurationException, SAXException {
-//        System.out.println("\nRunning testExecutePOSTValueComplexBinaryASynchronousBinaryOutputStoreStatusNoEncoding");
-//
-//        try {
-//
-//            Object responseObject =  createAndSubmitMultiReferenceBinaryInputAlgorithmExecuteWithResponseDocument(true, true, false, null);
-//
-//            assertThat(responseObject, is(not(nullValue())));
-//            assertThat(responseObject, is(not(instanceOf(ExceptionReportDocument.class))));
-//
-//            if (responseObject instanceof ExecuteResponseDocument) {
-//
-//                ExecuteResponseDocument executeResponseDocument = (ExecuteResponseDocument)responseObject;
-//
-//                String response = executeResponseDocument.toString();
-//
-//                String asyncDoc = AllTestsIT.getAsyncDoc(response);
-//                assertThat(AllTestsIT.parseXML(response), is(not(nullValue())));
-//                assertThat(asyncDoc, asyncDoc, containsString("ProcessSucceeded"));
-//                assertThat(asyncDoc, asyncDoc, containsString(base64TiffStart));
-//            }
-//        } catch (WPSClientException e) {
-//            e.printStackTrace();
-//        }
-//    }
-//
-//    @Test
-//    public void testExecutePOSTValueComplexBinaryASynchronousBinaryOutputRawBase64() throws IOException, ParserConfigurationException, SAXException {
-//        System.out.println("\nRunning testExecutePOSTValueComplexBinaryASynchronousBinaryOutputRawBase64");
-//
-//        try {
-//
-//            Object responseObject =  createAndSubmitMultiReferenceBinaryInputAlgorithmExecuteWithResponseDocument(true, true, true);
-//
-//            assertThat(responseObject, is(not(nullValue())));
-//            assertThat(responseObject, is(not(instanceOf(ExceptionReportDocument.class))));
-//
-//            if (responseObject instanceof ExecuteResponseDocument) {
-//
-//                ExecuteResponseDocument executeResponseDocument = (ExecuteResponseDocument)responseObject;
-//
-//                String response = executeResponseDocument.toString();
-//                assertThat(response, response, not(containsString("ExceptionReport")));
-//                assertThat(response, response, containsString("Status"));
-//                assertThat(AllTestsIT.parseXML(response), is(not(nullValue())));
-//                String refDoc = AllTestsIT.getAsyncDoc(response);
-//                AllTestsIT.checkReferenceBinaryResultBase64(refDoc);
-//            }
-//        } catch (WPSClientException e) {
-//            e.printStackTrace();
-//        }
-//    }
-//
-//    @Test
-//    public void testExecutePOSTValueComplexBinaryASynchronousBinaryOutputReferenceStoreStatusNoEncoding() throws IOException, ParserConfigurationException, SAXException {
-//        System.out.println("\nRunning testExecutePOSTValueComplexBinaryASynchronousBinaryOutputReferenceStoreStatusNoEncoding");
-//
-//        try {
-//
-//            Object responseObject =  createAndSubmitMultiReferenceBinaryInputAlgorithmExecuteWithResponseDocument(true, true, true, null);
-//
-//            assertThat(responseObject, is(not(nullValue())));
-//            assertThat(responseObject, is(not(instanceOf(ExceptionReportDocument.class))));
-//
-//            if (responseObject instanceof ExecuteResponseDocument) {
-//
-//                ExecuteResponseDocument executeResponseDocument = (ExecuteResponseDocument)responseObject;
-//
-//                String response = executeResponseDocument.toString();
-//
-//                assertThat(response, response, not(containsString("ExceptionReport")));
-//                assertThat(response, response, containsString("Status"));
-//                assertThat(AllTestsIT.parseXML(response), is(not(nullValue())));
-//                String refDoc = AllTestsIT.getAsyncDoc(response);
-//                AllTestsIT.checkReferenceBinaryResultDefault(refDoc);
-//            }
-//        } catch (WPSClientException e) {
-//            e.printStackTrace();
-//        }
-//    }
-//
-//    @Test
-//    public void testExecutePOSTValueComplexBinarySynchronousBinaryOutputRawbase64() throws IOException {
-//        System.out.println("\nRunning testExecutePOSTValueComplexBinarySynchronousBinaryOutputRawbase64");
-//
-//        try {
-//
-//            Object responseObject =  createAndSubmitMultiReferenceBinaryInputAlgorithmExecuteWithRawData(true, true, true, "base64");
-//
-//            assertThat(responseObject, is(not(nullValue())));
-//            assertThat(responseObject, is(not(instanceOf(ExceptionReportDocument.class))));
-//
-//            if (responseObject instanceof InputStream) {
-//
-//                AllTestsIT.checkRawBinaryResultBase64((InputStream) responseObject);
-//            }
-//        } catch (WPSClientException e) {
-//            e.printStackTrace();
-//        }
-//    }
-//
-//    @Test
-//    public void testExecutePOSTValueComplexBinarySynchronousBinaryOutputRawNoEncoding() throws IOException {
-//        System.out.println("\nRunning testExecutePOSTValueComplexBinarySynchronousBinaryOutputRawNoEncoding");
-//
-//        try {
-//
-//            Object responseObject =  createAndSubmitMultiReferenceBinaryInputAlgorithmExecuteWithRawData(true, true, true, null);
-//
-//            assertThat(responseObject, is(not(nullValue())));
-//            assertThat(responseObject, is(not(instanceOf(ExceptionReportDocument.class))));
-//
-//            if (responseObject instanceof InputStream) {
-//
-//                AllTestsIT.checkRawBinaryResultDefault((InputStream) responseObject);
-//            }
-//        } catch (WPSClientException e) {
-//            e.printStackTrace();
-//        }
-//    }
 
     //    private Object createAndSubmitMultiReferenceBinaryInputAlgorithmExecuteWithResponseDocument(boolean status, boolean storeSupport, boolean asReference, String outputEncoding) throws WPSClientException, IOException{
 //
@@ -1561,8 +1523,6 @@ public class ExecutePostIT extends Base {
             echoProcessExecuteRequestBuilder.setAsynchronousExecute();
         }
 
-
-
         Object responseObject =  WPSClientSession.getInstance().execute(url, echoProcessExecuteRequestBuilder.getExecute(), version200);
 
         return responseObject;
@@ -1633,6 +1593,107 @@ public class ExecutePostIT extends Base {
         assertNotNull("Data value must not be null.", valueObj);
         assertThat("Data value must be String.", valueObj, is(instanceOf(String.class)));
         assertThat("Data value must contain " + value, ((String)valueObj).contains(value));
+    }
+
+    public void checkInlineResultBase64(Result result,
+            String outputID){
+
+        Data data = getData(result, outputID);
+
+        assertNotNull("Data must not be null.", data);
+
+        Object valueObj =  data.getValue();
+
+        assertNotNull("Data value must not be null.", valueObj);
+        assertThat("Data value must be String.", valueObj, is(instanceOf(String.class)));
+
+        assertTrue(Base64.isBase64((String)valueObj));
+
+    }
+
+    private void checkReferenceResultBase64(Result result,
+            String outputID) {
+
+        Data data = getData(result, outputID);
+
+        assertNotNull("Data must not be null.", data);
+
+        URL referenceURL = getReferenceURL(data);
+
+        assertNotNull("Data value must not be null.", referenceURL);
+
+        try {
+            java.nio.file.Files.write(java.nio.file.Paths.get("d:/tmp/45724727.pdf"), referenceURL.toString().getBytes());
+            checkInputStreamBase64(referenceURL.openStream());
+        } catch (IOException e) {
+            fail(e.getMessage());
+        }
+
+    }
+    private URL getReferenceURL(Data data) {
+        ComplexDataReference referenceObj = null;
+
+        try {
+            referenceObj = data.asComplexReferenceData().getReference();
+        } catch (Exception e) {
+            fail(e.getMessage());
+        }
+
+        return referenceObj.getHref();
+    }
+
+    private void checkInputStreamBase64(InputStream inputStream) throws IOException {
+        StringWriter writer = new StringWriter();
+        String encoding = StandardCharsets.UTF_8.name();
+        IOUtils.copy(inputStream, writer, encoding);
+        assertTrue(Base64.isBase64(writer.toString()));
+    }
+
+    private Format getDefaultFormat(Process processDescription,
+            String identifier) {
+
+        Format defaultFormat = null;
+
+        defaultFormat = getDefaultFormat(processDescription.getInputs().stream()
+                .map(wpsDescriptionParameter -> (WPSDescriptionParameter) wpsDescriptionParameter)
+                .collect(Collectors.toList()), identifier);
+
+        if (defaultFormat == null) {
+            defaultFormat = getDefaultFormat(processDescription.getOutputs().stream()
+                    .map(wpsDescriptionParameter -> (WPSDescriptionParameter) wpsDescriptionParameter)
+                    .collect(Collectors.toList()), identifier);
+        } else {
+            return defaultFormat;
+        }
+
+        return defaultFormat;
+
+    }
+
+    private Format getDefaultFormat(List<WPSDescriptionParameter> descriptionParameters, String parameterId) {
+
+        for (WPSDescriptionParameter wpsDescriptionParameter : descriptionParameters) {
+            if(wpsDescriptionParameter.getId().equals(parameterId)) {
+                return wpsDescriptionParameter.getDefaultFormat();
+            }
+        }
+        return null;
+    }
+
+    private void checkReferenceResultFormat(Result result,
+            String outputId,
+            Format defaultFormat) {
+        List<Data> outputs = result.getOutputs();
+
+        boolean formatMatches = false;
+
+        for (Data data : outputs) {
+            if (data.getId().equals(outputId)) {
+                formatMatches = true;
+                break;
+            }
+        }
+        assertTrue("Format check failed.", formatMatches);
     }
 
 }
