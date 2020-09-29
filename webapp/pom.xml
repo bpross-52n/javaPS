@@ -302,6 +302,9 @@
     <profiles>
         <profile>
             <id>integration-test</id>
+            <properties>            
+                <config.file>WEB-INF/config/configuration.json</config.file>
+            </properties>
             <build>
                 <plugins>
                     <plugin>
@@ -399,6 +402,29 @@
                             </execution>
                         </executions>
                     </plugin>
+					<plugin>
+						<groupId>com.google.code.maven-replacer-plugin</groupId>
+						<artifactId>replacer</artifactId>
+						<version>1.5.3</version>
+						<executions>
+							<execution>
+								<phase>pre-integration-test</phase>
+								<goals>
+									<goal>replace</goal>
+								</goals>
+							</execution>
+						</executions>
+						<configuration>
+							<file>${project.build.directory}/${project.build.finalName}/${config.file}</file>
+							<regex>false</regex>
+							<replacements>
+								<replacement>
+									<token>"http://localhost:8080/javaps/service"</token>
+									<value>"http://localhost:${jetty.http.port}/javaps/service"</value>
+								</replacement>
+							</replacements>
+						</configuration>
+					</plugin>
                 </plugins>
             </build>
             <dependencies>
