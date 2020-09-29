@@ -242,6 +242,11 @@
             <artifactId>log4j-over-slf4j</artifactId>
             <scope>runtime</scope>
         </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
