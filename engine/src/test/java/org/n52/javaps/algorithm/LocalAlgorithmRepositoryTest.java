@@ -49,8 +49,6 @@ import org.n52.shetland.ogc.wps.Result;
 import org.n52.shetland.ogc.wps.data.ProcessData;
 import org.n52.shetland.ogc.wps.data.impl.StringValueProcessData;
 
-//@RunWith(SpringJUnit4ClassRunner.class)
-//@ContextConfiguration(classes = {InputProviderList.class, OutputProviderList.class, LocalAlgorithmRepository.class, ProviderAwareListableBeanFactory.class, InputHandlerRepositoryImpl.class, OutputHandlerRepositoryImpl.class, LiteralTypeRepositoryImpl.class, SpringContext.class, TestAlgorithm2.class, ContextAlgorithmRegistrator.class})
 public class LocalAlgorithmRepositoryTest extends AbstractTestCase {
 
     public static final String epsg4328String = "EPSG:4328";
