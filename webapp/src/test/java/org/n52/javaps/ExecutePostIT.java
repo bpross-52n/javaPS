@@ -1621,13 +1621,6 @@ public class ExecutePostIT extends Base {
 
         assertNotNull("Data value must not be null.", referenceURL);
 
-        try {
-            java.nio.file.Files.write(java.nio.file.Paths.get("d:/tmp/45724727.pdf"), referenceURL.toString().getBytes());
-            checkInputStreamBase64(referenceURL.openStream());
-        } catch (IOException e) {
-            fail(e.getMessage());
-        }
-
     }
     private URL getReferenceURL(Data data) {
         ComplexDataReference referenceObj = null;
